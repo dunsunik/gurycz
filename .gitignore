@@ -3,3 +3,4 @@
 dist/
 node_modules/
 www/bower_components/
+vendor/
