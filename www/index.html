@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html ng-controller="AppCtrl">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">																     
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title></title>
+
+	<!-- your compiles CSS -->
+	<link rel="stylesheet" type="text/css" href="assets/<%= grunt.config.get('pkg.name') %>.css"/>
+
+	<!--[if IE 7>
+	<link rel="stylesheet" href="assets/font-awesome-ie7.min.css>
+	<![endif]-->
+
+	<!-- CORE LIBS - FROM GOOGLE CDN -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.2.0/ui-bootstrap-tpls.js"></script>
+
+
+	<!-- libs.js contains all of the concatenated third-party libraries -->
+	<script type="text/javascript" src="assets/libs.js"></script>
+
+	<!-- this is your compiled, minified application code -->
+	<script type="text/javascript" src="assets/<%= grunt.config.get('pkg.name') %>.js"></script>
+
+	<!-- it's stupid to have to load it here, but this is for the +1 button -->
+	<script type="text/javascript" src="https://apis.google.com/js/plusone.js">
+	{ "parsetags": "explicit" }
+	</script>
+</head>
+
+<body>
+	<!-- Gury.cz logo -->
+	<div id="logo" class="affix-top"><a href="#/home"><img src="assets/gurycz-full.png" /></a></div>
+
+	<div id="background"></div>
+	<div id="overlay"></div>
+
+	<div id="loading-global"><img src="assets/ajax-loader.gif" alt="loading" /></div>
+
+	<!-- header menu -->
+	<header id="header">
+			<div class="row-fluid">
+				<div class="span12">
+					<div class="navbar">
+						<div class="navbar-inner">
+							<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+								<span class="icon-bar"></span>
+							</a>
+
+							<div class="nav-collapse collapse">
+								<ul class="nav pull-right" id="navigation">
+									<li><a data-nav="scroll" href="#/home" class="active">ÚVOD</a></li>
+									<li><a data-nav="scroll" href="#/albums">GALERIE ALBA</a></li>
+									<li><a data-nav="scroll" href="#/photo-equipment">FOTO VÝBAVA</a></li>
+									<li><a data-nav="scroll" href="#/contact">KONTAKT</a></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	</header>
+
+
+	<div id="main-content" class="container" ng-view></div>
+
+<!--
+	<div id="footer" class="navbar-fixed-bottom">
+			<ul class="nav nav-pills">
+				<li active-if-current><a href="#/home">ÚVOD</a></li>
+				<li active-if-current><a href="#/albums">GALERIE ALBA</a></li>
+				<li active-if-current><a href="#/photo-equipment">FOTO VÝBAVA</a></li>
+				<li active-if-current><a href="#/contact">KONTAKT</a></li>
+				<li class="social pull-right"><a target="_blank" href="http://twitter.com/dunsun"><i class="icon-twitter-sign"></i></a></li>
+				<li class="social pull-right"><a target="_blank" href="http://linkedin.com/in/dunsun"><i class="icon-linkedin-sign"></i></a></li>
+				<li class="social pull-right"><a target="_blank" href="http://gplus.to/dunsun"><i class="icon-google-plus-sign"></i></a></li>
+				<li class="social pull-right"><a target="_blank" href="http://facebook.com/daniel.guryca"><i class="icon-facebook-sign"></i></a></li>
+			</ul>
+	</div>
+-->
+</body>
+</html>

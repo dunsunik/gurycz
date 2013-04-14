@@ -1,0 +1,26 @@
+<div class="jumbotron">
+  <h1></h1>
+
+  <a href="/#/home">ZPET NA ALBA</a>
+
+	<section id="photos">
+		<div id="list" ng-repeat="item in albums">
+			<ul class="thumbnails">
+ 				<div ng-include="'album-block.html'"></div>    
+			</ul>
+		</div>
+
+		<script type="text/ng-template" id="album-block.html"> 
+			<li class="span4">
+				<div class="thumbnail">
+					<a ng-href="/#/photos/album-id/{{item.id}}" class="thumbnail">
+						<img data-src="/assets/holder.js/300x200" src="{{item.thumb.src}}" alt="" />
+						<h3>{{item.title}}</h3>
+						<p>{{title.descr}}</p>
+					</a>
+				</div>
+			</li>
+		</script>
+	</section>
+</div>
+
