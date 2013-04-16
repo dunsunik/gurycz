@@ -5,12 +5,13 @@ angular.module( 'gury', [
 	'gury.base',
 	'gury.home',
 	'gury.photos',
+	'gury.albums',
 	'gury.about',
 	'gury.picasa'
 ]).
 
 config( function myAppConfig ( $routeProvider ) {
-  $routeProvider.otherwise({ redirectTo: '/home' });
+	$routeProvider.otherwise({ redirectTo: '/home' });
 }).
 
 run([ 'titleService', function run ( titleService ) {

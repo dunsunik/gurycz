@@ -83,20 +83,20 @@ factory('Validation', ['$rootScope', function($rootScope) {
 	self.init = function(opts) {
 		$rootScope.$Validation = $rootScope.$Validation || {};
 		$rootScope.$Validation = self;
-	}
+	};
 
 	self.set = function(opts) {
 		$rootScope.$Validation = $rootScope.$Validation || {};
 		$rootScope.$Validation = self;
-	}
+	};
 
 	self.setInvalid = function(path) {
 		return self.set(path, false, undefined);
-	}
+	};
 
 	self.setValid = function(path) {
 		return self.set(path, true, undefined);
-	}
+	};
 
 	// 
 	self.getBlankDefinitionStructure = function(path) {
@@ -108,11 +108,11 @@ factory('Validation', ['$rootScope', function($rootScope) {
 		};
 		hash[group].columns[key] = {};
 		return hash;
-	}
+	};
 
 	self.set = function(path, validity) {
 		return self.set(obj, validity, undefined);
-	}
+	};
 
 	self.set = function(path, validity, errmsg) {
 		if(path) {
@@ -135,21 +135,21 @@ factory('Validation', ['$rootScope', function($rootScope) {
 				}
 			}
 		}
-	}
+	};
 
 	// returns Hashtable object containing all validations
 	self.getAll = function() {
 		return self.data.validations;
-	}
+	};
 
 	// return array of all validations entries
 	self.getAllEntries = function() {
 		return self.data.validations.entries();
-	}
+	};
 
 	self.get = function(path) {
 		var result = {};
-		if(path != undefined) {
+		if(path !== undefined) {
 			var col = self.getColumnByPath(path);
 			if(col && col.err) {
 				result.err = true;
@@ -157,31 +157,31 @@ factory('Validation', ['$rootScope', function($rootScope) {
 			}
 		}
 		return result;
-	}
+	};
 
 	// just read the previously processed and set validity flag
 	self.isValid = function(path) {
 		var result = self.get(path);
 		return result && result.err ? false : true;
-	}
+	};
 
 	self.isInvalid = function(path) {
 		return !self.isValid(path);
-	}
+	};
 
 	self.getErrMsg = function(path) {
 		var result = self.get(path);
 		return (result && result.errmsg) ? result.errmsg : '';
-	}
+	};
 
 	self.processValidation = function(key, val) {
 		var isValid = self.isValidProcess(key, val);
-	}
+	};
 
 	// bind a set of validation definitions to a specified group(s)
 	self.bindDefiniotionsToGroup = function(key, val) {
 		var isValid = self.isValidProcess(key, val);
-	}
+	};
 
 	// check if val is valid (key is a key within validation definitions)
 	self.isValidProcess = function(path, val) {
@@ -194,37 +194,37 @@ factory('Validation', ['$rootScope', function($rootScope) {
 		var rules = def.rules;
 
 		var isNum = function(val) {
-			return isNaN(val) || val == '' ? false : true;
-		}
+			return isNaN(val) || val === '' ? false : true;
+		};
 
 		var isInt = function(val) {
-			return isNum(val) && val % 1 == 0 ? true : false;
-		}
+			return isNum(val) && val % 1 === 0 ? true : false;
+		};
 
 		var isFloating = function(val) {
 			return isNum(val) && !isInt(val) ? true : false;
-		}
+		};
 
 		var isArray = function(val) {
 			return $.isArray(val) ? true : false;
-		}
+		};
 
 		var isString = function(val) {
 			return jQuery.type(val) === 'string' ? true : false;
-		}
+		};
 
 		var isEmpty = function(val) {
 			if(isNum(val)) {
-				return val != undefined && val != null ? false : true;
+				return val !== undefined && val != null ? false : true;
 			}
 			else {
-				return val != undefined && val != null && val.length > 0 ? false : true;
+				return val !== undefined && val != null && val.length > 0 ? false : true;
 			}
-		}
+		};
 
 		var isAnyOf = function(val, array) {
-			return !(val != undefined && jQuery.inArray(val, array)) ? false : true;
-		}
+			return !(val !== undefined && jQuery.inArray(val, array)) ? false : true;
+		};
 
 			
 		// check type
@@ -269,7 +269,7 @@ factory('Validation', ['$rootScope', function($rootScope) {
 		if(rules) {
 			// not_null
 			if(rules.not_null) {
-				if(val == null || val == undefined) {
+				if(val == null || val === undefined) {
 					return false;
 				}
 			}
@@ -291,8 +291,8 @@ factory('Validation', ['$rootScope', function($rootScope) {
 			// email
 			if(rules.email) {
 				//  RFC 2822 implementation
-				var regexp = new Regexp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?");
-				if(!(val != undefined && val.match(regexp))) {
+				var regexp = new Regexp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?");
+				if(!(val !== undefined && val.match(regexp))) {
 					return false;
 				}
 			}
@@ -313,73 +313,72 @@ factory('Validation', ['$rootScope', function($rootScope) {
 
 			// max_val
 			if(rules.max_val) {
-				if(!(val != undefined && val <= rules.max_val)) {
+				if(!(val !== undefined && val <= rules.max_val)) {
 					return false;
 				}
 			}
 
 			// min_val
 			if(rules.min_val) {
-				if(!(val != undefined && val >= rules.min_val)) {
+				if(!(val !== undefined && val >= rules.min_val)) {
 					return false;
 				}
 			}
 
 			// max_length
 			if(rules.max_length) {
-				if(!(val != undefined && val.length <= rules.max_length)) {
+				if(!(val !== undefined && val.length <= rules.max_length)) {
 					return false;
 				}
 			}
 
 			// min_length
 			if(rules.min_length) {
-				if(!(val != undefined && val.length >= rules.min_length)) {
+				if(!(val !== undefined && val.length >= rules.min_length)) {
 					return false;
 				}
 			}
 
 			// regexp_match
 			if(rules.regexp_match) {
-				var regexp = new RegExp(rules.regexp_match);
-				if(!(val != undefined && val.match(regexp))) {
+				if(!(val !== undefined && val.match(new RegExp(rules.regexp_match)))) {
 					return false;
 				}
 			}      
 		}
 
 		return true;
-	}
+	};
 
 
 	// parse group from a path
 	self.getGroup = function(path) {
 			return path ? path.replace(/([^.]*)\.(.*)/, "$1") : "";
-	}
+	};
 
 	// parse key from a path
 	self.getKey = function(path) {
 			var key = path.replace(/([^.]*)\.(.*)/, "$2");
 			return key;
-	}
+	};
 
 	self.setDefinitions = function(obj) {
 		self.data.definitions = obj;
-	}
+	};
 
 	self.getDefinitions = function() {
 		return self.data.definitions;
-	}
+	};
 
 
 	self.getDefinitionByPath = function(path) {
 		var group = self.getGroup(path);
 		return self.getDefinitions()[group];
-	}
+	};
 
 	self.getDefinitionByGroup = function(group) {
 		return self.getDefinitions()[group];
-	}
+	};
 
 	// get columns associated with a specified path
 	self.getColumns = function(path) {
@@ -393,18 +392,18 @@ factory('Validation', ['$rootScope', function($rootScope) {
 		}
 
 		return {};
-	}
+	};
 
 	self.getColumnByPath = function(path) {
 		var cols = self.getColumns(path);
 		var key = self.getKey(path);
 		return (key in cols) ? cols[key] : {};
-	}
+	};
 
 	self.getColumnByKey = function(key) {
 		var cols = self.getColumns(path);
 		return (key in cols) ? cols[key] : {};
-	}
+	};
 
 	return self;
 }]).
@@ -418,28 +417,34 @@ factory('Working', ['$rootScope', function($rootScope) {
 	self.init = function() {
 		$rootScope.$Working = $rootScope.$Working || {};
 		$rootScope.$Working = self;
-	}
+	};
 
 	self.setOrUnset = function(name, isWorking) {
 		return self.data[name] = isWorking;
-	}
+	};
 
 	self.set = function(name) {
 		return self.setOrUnset(name, true);
-	}
+	};
 
 	self.unset = function(name) {
 		return self.setOrUnset(name, false);
-	}
+	};
 
 	self.get = function(name) {
 		var obj = self.data[name];
 		return obj ? true : false;
-	}
+	};
 
 	self.isWorking = function(name) {
 		return self.get(name);
-	}
+	};
 
 	return self;
+}]).
+
+// Cache
+factory('cache', ['$cacheFactory', function($cacheFactory) {
+	var cache = $cacheFactory('myCache');
+	return cache;
 }]);

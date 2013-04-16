@@ -41,7 +41,11 @@
 	<div id="background"></div>
 	<div id="overlay"></div>
 
-	<div id="loading-global"><img src="assets/ajax-loader.gif" alt="loading" /></div>
+	<div id="loading-global" ng-hide="$Working.isWorking('loading-global')">
+		<div class="loading-global-inner">
+			<img src="assets/ajax-loader.gif" alt="loading" />
+		</div>
+	</div>
 
 	<!-- header menu -->
 	<header id="header">
