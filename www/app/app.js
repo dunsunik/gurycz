@@ -3,20 +3,23 @@ angular.module( 'gury', [
 	'app-templates',
 	'component-templates',
 	'gury.base',
-	'gury.home',
-	'gury.photos',
+	'gury.picasa',
+	'gury.hp',
+	'gury.portfolio',
 	'gury.albums',
-	'gury.about',
-	'gury.picasa'
+	'gury.photos',
+	'gury.about'
 ]).
 
 config( function myAppConfig ( $routeProvider ) {
-	$routeProvider.otherwise({ redirectTo: '/home' });
+	$routeProvider.otherwise({ redirectTo: '/portfolio' });
 }).
 
 run([ 'titleService', function run ( titleService ) {
   titleService.setSuffix( ' | gury' );
 }]).
+
+
 
 // controller
 controller( 'AppCtrl', [ '$scope', '$location', function AppCtrl ( $scope, $location ) {

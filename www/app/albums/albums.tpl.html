@@ -4,22 +4,19 @@
 	<a href="/#/home">ZPET NA ALBA</a>
 
 	<section id="photos">
-		<div id="list" ng-repeat="item in albums">
+		<div id="list" ng-repeat="item in albums" class="gallery container">
 			<ul class="thumbnails">
-				<div ng-include="'album-block.html'"></div>    
+				<li class="span6" ng-include="'album-block.html'">
+				</li>
 			</ul>
 		</div>
 
 		<script type="text/ng-template" id="album-block.html"> 
-			<li class="span4">
-				<div class="thumbnail">
-					<a ng-href="/#/photos/album-id/{{item.id}}" class="thumbnail">
-						<img data-src="/assets/holder.js/300x200" src="{{item.thumb.src}}" alt="" />
-						<h3>{{item.title}}</h3>
-						<p>{{title.descr}}</p>
-					</a>
-				</div>
-			</li>
+				<a ng-href="/#/photos/albumid/{{item.id}}" class="thumbnail">
+					<img  src="{{item.thumb.src}}" alt="" class="group1"/>
+					<h3>{{item.title}}</h3>
+					<p>{{title.descr}}</p>
+				</a>
 		</script>
 	</section>
 </div>

@@ -65,7 +65,7 @@ angular.module('gury.picasa', [])
 		'max-results': 30,
 		// set overrideLayout to true if you want to handle the images and markup directly.
 		overrideLayout: false,
-		username: 'dunsun',
+		user: 'dunsun',
 		hide_albums: ['Profile Photos', 'scrapBook', 'instantUpload', 'Photos from posts']
 	};	
 		
@@ -117,13 +117,15 @@ angular.module('gury.picasa', [])
 	// url functions
 	var urls = {
 		// generate complete picasa request url
-		prepare : function(url, params) {
-			url = 'https://picasaweb.google.com/data/feed/api/' + url + '?v=2';
+		prepare : function(params) {
 
 			params = params ? params : {};
 
 			params = angular.extend({
+				'user': opts['user'],
+				'albumid': '',
 				'kind': 'photo',
+				'tag': undefined,
 				'max-results': opts['max-results'],
 				'thumbsize': opts.thumbsize + "c",
 				'imgmax': opts.imagesize,
@@ -132,27 +134,58 @@ angular.module('gury.picasa', [])
 				'callback': 'JSON_CALLBACK'
 			}, params);
 
+			var url = 'https://picasaweb.google.com/data/feed/api/';
+
+			// user
+			if(params.user) {
+				url = url + 'user/' + params.user;
+			}
+
+			// albumid
+			if(params.albumid) {
+				url = url + '/albumid/' + params.albumid;
+			}
+
+			// picasa version 2
+			url = url + '?v=2';
+
+			// add all other &key=val parameters
 			angular.forEach(params, function (val, key) {
-				url = url + '&' + key + '=' + val;
+				if(val != undefined) {
+					url = url + '&' + key + '=' + val;
+				}
 			});
+
+			console.log('URL:' + url);
 
 			return url;
 		},
 
-		photos : function(username, album) {
-			return this.prepare("user/" + username + "/albumid/" + album, {});
+		photos : function(params) {
+			return this.prepare({
+				'user': params.user,
+				'albumid': params.albumid,
+				'tag': params.tag,
+				'max-results': params['max-results'],
+				'kind': 'photo'
+			});
 		},
 
-		albums : function(username) {
-			return this.prepare("user/" + username, {kind: 'album'});
+		albums : function(params) {
+			return this.prepare({
+				'user': params.user,
+				'max-results': params['max-results'],
+				'kind': 'album'
+			});
 		},
 
-		latestPhotos : function(maxResults, albumId, username) {
-			return this.prepare("user/" + username , {kind: 'photo', 'max-results': maxResults});
-		},
-
-		tags : function(username) {
-			return this.prepare("user/" + username, {kind: 'tag'});
+		tags : function(params) {
+			return this.prepare({
+				'user': params.user,
+				'albumid': params.albumid,
+				'max-results': params['max-results'],
+				'kind': 'tag'
+			});
 		}
 	};
 
@@ -162,11 +195,14 @@ angular.module('gury.picasa', [])
       get : function (url) {
         return parsePhotos(url);
       },
+
       current : function () {
         return current.promise;
       },
-	getAlbums: function() {
-		var url = urls.albums(opts.username);
+
+	// params: user, max-results
+	getAlbums: function(params) {
+		var url = urls.albums(params);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
 			console.log(data.data.items);
@@ -194,14 +230,13 @@ angular.module('gury.picasa', [])
 
 		return d.promise;
 	},
-	getPhotos: function(albumId) {
-		return urls.photos(opts.username, albumId);
-	},
-	getLatestPhotos: function(params) {
-		var url = urls.latestPhotos(params.maxResults, params.albumId, opts.username);
+
+	// params: user, albumid, max-results
+	getPhotos: function(params) {
+		var url = urls.photos(params);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
-			console.log(data.data.items);
+			console.log(data);
 			var items = [];
 			angular.forEach(data.data.items, function(item) {
 				if(!item.type) {
@@ -225,8 +260,15 @@ angular.module('gury.picasa', [])
 		});
 		return d.promise;
 	},
-	getTags: function() {
-		var url = urls.tags(opts.username);
+
+	// params: user, albumid, max-results,
+	getLatestPhotos: function(params) {
+		return this.getPhotos(params);
+	},
+
+	// params: user, albumid, max-results
+	getTags: function(params) {
+		var url = urls.tags(params);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
 			d.resolve(data);

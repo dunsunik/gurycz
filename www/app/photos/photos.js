@@ -22,7 +22,9 @@ angular.module( 'gury.photos', [
  * this way makes each module more "self-contained".
  */
 .config([ '$routeProvider', function config( $routeProvider ) {
-	$routeProvider.when( '/photos/album-id/:albumId', {
+	// type can be one of: tag, latest, album
+	// val can be for example 344 (albumid) or a tag name can be for example landscape
+	$routeProvider.when( '/photos/:type/:val', {
 		controller: 'PhotosCtrl',
 		templateUrl: 'photos/photos.tpl.html'
 	});
@@ -33,6 +35,35 @@ angular.module( 'gury.photos', [
  */
 .controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', function PhotosController( $scope, titleService, picasaService, $routeParams ) {
 	titleService.setTitle( 'Photos' );
+
+	// type - tag, latest, album
+	var type = $routeParams.type;
+	$scope.type = $routeParams.type;
+
+	console.log('tag:' + $routeParams.val);
+
+	// show photos for a specified tag
+	if(type == "tag") {
+		picasaService.getPhotos({'max-results': 6, user: 'dunsun', tag: $routeParams.val}).then(function(data) {
+			console.log('prijely fota by tag');
+			console.log(data);
+			$scope.photos = data;
+		});
+	}
+	else if(type == "latest") {
+		picasaService.getPhotos({'max-results': 4, user: 'dunsun', tag: $routeParams.val}).then(function(data) {
+			console.log('prijely fota latest');
+			console.log(data);
+		});
+	}
+	else if(type == "albumid") {
+		picasaService.getPhotos({'max-results': 40, user: 'dunsun', 'albumid': $routeParams.val}).then(function(data) {
+			$scope.photos = data;
+			console.log('prijely fota by albumid');
+			console.log(data);
+		});
+	}
+
 
 	$scope.getAlbums = function() {
 		console.log('jede');
@@ -54,6 +85,18 @@ angular.module( 'gury.photos', [
 			console.log(data);
 		});
 	};
+
+	$scope.getPhotosByTag = function(maxResults) {
+		console.log('jede');
+		console.log(picasaService);
+		var promise = picasaService.getLatestPhotos({'maxResults': maxResults, 'albumId': ''});
+		promise.then(function(data) {
+			console.log('OK');
+			console.log(data);
+		});
+	};
+
+
 	$scope.getLatestPhotos = function(maxResults) {
 		console.log('jede');
 		console.log(picasaService);

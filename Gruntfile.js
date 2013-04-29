@@ -78,7 +78,9 @@ module.exports = function ( grunt ) {
      * ! se musi davat zezadu inac nezafunguji
      */
     src: {
-      jsLibs: [ '<%= componentsdir %>/**/*.min.js', '!<%= componentsdir %>/json3/build.js', '!<%= componentsdir %>/**/jquery.min.js',  '!<%= componentsdir %>/**/angular.min.js', '<%= componentsdir %>/vegas/*.js'], 
+      jsLibs: [ '<%= componentsdir %>/**/*.min.js', '!<%= componentsdir %>/json3/build.js', '<%= componentsdir %>/vegas/*.js',
+							'<%= vendordir %>/twitter-bootstrap/docs/assets/js/holder/holder.js',
+							'!<%= componentsdir %>/**/jquery.min.js',  '!<%= componentsdir %>/**/angular.min.js'], 
       jsApp: [  '<%= srcdir %>/**/*.js', '!<%= srcdir %>/**/*.spec.js', '!<%= componentsdir %>/**/*' ], 
       atpl: [ '<%= srcdir %>/app/**/*.tpl.html' ],
       ctpl: [ '<%= componentsdir %>/**/*.tpl.html' ],
@@ -187,7 +189,24 @@ module.exports = function ( grunt ) {
         dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
         options: {
           compile: true,
-          compress: true,
+          compress: false,
+          noUnderscores: false,
+          noIDs: false,
+          zeroUnits: false
+        }
+      }
+    },
+
+    /**
+     * When runing in development we do not compress since it costs too much time
+     */
+    recessdev: {
+      build:  {
+        src: [ '<%= src.less %>' ],
+        dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
+        options: {
+          compile: true,
+          compress: false,
           noUnderscores: false,
           noIDs: false,
           zeroUnits: false
@@ -331,7 +350,7 @@ module.exports = function ( grunt ) {
        * When the CSS files change, we need to compile and minify just them.
        */
       less: {
-        files: [ '<%= srcdir %>/less/main.less' ],
+        files: [ '<%= srcdir %>/**/*.less' ],
         tasks: [ 'recess' ]
       },
 
@@ -374,7 +393,7 @@ module.exports = function ( grunt ) {
    * The default task is to build.
    */
   grunt.registerTask( 'default', [ 'build' ] );
-  grunt.registerTask( 'build', ['clean', 'html2js', 'jshint', 'test', 'concat', 'uglify', 'recess', 'index', 'copy'] );
+  grunt.registerTask( 'build', ['clean', 'html2js', 'jshint', 'concat', 'uglify', 'recess', 'index', 'copy'] );
   grunt.registerTask( 'notest', ['clean', 'html2js', 'jshint', 'concat', 'uglify', 'recess', 'index', 'copy'] );
 
   /**
