@@ -1,0 +1,197 @@
+<!-- ALBUMY -->
+<section id="portfolio" class="box">
+	<div class="container">
+		<div class="panel">
+			<div class="row-fluid">
+				<div class="span12 header">
+					<hgroup>
+						<h2>Portfolio</h2>
+						<h3>Lorem ipsum dolor site amet</h3>
+					</hgroup>
+				</div>
+			</div>
+		</div>
+
+		<div class="row-fluid">
+			<div class="span12 content">
+
+
+				<section id="albums" class="container">
+					<div id="list" ng-repeat="item in albums">
+						<ul class="thumbnails">
+							<div ng-include="'album-block.html'"></div>    
+						</ul>
+					</div>
+
+					<script type="text/ng-template" id="album-block.html"> 
+						<li class="span4>
+								<a ng-href="/#/photos/album-id/{{item.id}}" class="thumbnail">
+									<img data-src="/assets/holder.js/160x120" src="{{item.thumb.src}}" alt="" />
+									<h3>{{item.title}}</h3>
+									<p>{{title.descr}}</p>
+								</a>
+						</li>
+					</script>
+				</section>
+
+
+				<ul class="portfolio">
+				<li class="span4">
+					<div class="item">
+						<a href="img/bg1.jpg" class="lightbox_trigger">
+						<img src="img/tb1.jpg" alt="" />
+						</a>
+						<h3>Thumbnail label</h3>
+						<p>Thumbnail caption...</p>
+					</div>
+				</li>
+				<li class="span4">
+					<div class="item">
+						<a href="img/bg2.jpg" class="lightbox_trigger">
+						<img src="img/tb2.jpg" alt="" />
+						</a>
+						<h3>Thumbnail label</h3>
+						<p>Thumbnail caption...</p>
+					</div>
+				</li>
+				<li class="span4">
+					<div class="item">
+						<a href="img/bg3.jpg" class="lightbox_trigger">
+						<img src="img/tb3.jpg" alt="" />
+						</a>
+						<h3>Thumbnail label</h3>
+						<p>Thumbnail caption...</p>
+					</div>
+				</li>
+				</ul>
+
+				<ul class="portfolio">
+				<li class="span4">
+					<div class="item">
+						<a href="img/bg4.jpg" class="lightbox_trigger">
+						<img src="img/tb4.jpg" alt="" />
+						</a>
+						<h3>Thumbnail label</h3>
+						<p>Thumbnail caption...</p>
+					</div>
+				</li>
+				<li class="span4">
+					<div class="item">
+						<a href="img/bg5.jpg" class="lightbox_trigger">
+						<img src="img/tb5.jpg" alt="" />
+						</a>
+						<h3>Thumbnail label</h3>
+						<p>Thumbnail caption...</p>
+					</div>
+				</li>
+				<li class="span4">
+					<div class="item">
+						<a href="img/bg6.jpg" class="lightbox_trigger">
+						<img src="img/tb6.jpg" alt="" />
+						</a>
+						<h3>Thumbnail label</h3>
+						<p>Thumbnail caption...</p>
+					</div>
+				</li>
+				</ul>
+
+				<ul class="portfolio">
+				<li class="span4">
+					<div class="item">
+						<a href="img/bg7.jpg" class="lightbox_trigger">
+						<img src="img/tb7.jpg" alt="" />
+						</a>
+						<h3>Thumbnail label</h3>
+						<p>Thumbnail caption...</p>
+					</div>
+				</li>
+				<li class="span4">
+					<div class="item">
+						<a href="img/bg8.jpg" class="lightbox_trigger">
+						<img src="img/tb8.jpg" alt="" />
+						</a>
+						<h3>Thumbnail label</h3>
+						<p>Thumbnail caption...</p>
+					</div>
+				</li>
+				<li class="span4">
+					<div class="item">
+						<a href="img/bg9.jpg" class="lightbox_trigger">
+						<img src="img/tb9.jpg" alt="" />
+						</a>
+						<h3>Thumbnail label</h3>
+						<p>Thumbnail caption...</p>
+					</div>
+				</li>
+				</ul>
+
+			</div>
+		</div>
+		</div>
+	</div>
+</section>
+
+
+<div>
+  <h1></h1>
+
+            <ul class="thumbnails">
+
+                <li class="span3">
+					<a ng-href="/#/photos/album-id/{{item.id}}" class="thumbnail">
+						<img data-src="/assets/holder.js/160x120" src="{{item.thumb.src}}" alt="" />
+						<h3>{{item.title}}</h3>
+						<p>{{title.descr}}</p>
+					</a>
+                        <a class="thumbnail" rel="lightbox[group]" href="img/pics/1.jpg"><img class="group1" src="img/pics/1.jpg" title="Image Title" /></a>             
+                    </li> <!--end thumb -->
+                    <li class="span3">
+                        <a class="thumbnail" rel="lightbox[group]" href="img/pics/2.jpg"><img class="group1" src="img/pics/2.jpg" title="Image Title" /></a>
+                    </li> <!--end thumb -->
+                    <li class="span3">
+                        <a class="thumbnail" rel="lightbox[group]" href="img/pics/3.jpg"><img class="group1" src="img/pics/3.jpg" title="Image Title" /></a>
+                    </li> <!--end thumb -->
+                    <li class="span3">
+                        <a class="thumbnail" rel="lightbox[group]" href="img/pics/4.jpg"><img class="group1" src="img/pics/4.jpg" title="Image Title" /></a>
+                    </li> <!--end thumb -->
+                    <li class="span3">
+                        <a class="thumbnail" rel="lightbox[group]" href="img/pics/5.jpg"><img class="group1" src="img/pics/5.jpg" title="Image Title" /></a>
+                    </li> <!--end thumb -->
+                    <li class="span3">
+                        <a class="thumbnail" rel="lightbox[group]" href="img/pics/6.jpg"><img class="group1" src="img/pics/6.jpg" title="Image Title" /></a>
+                    </li> <!--end thumb -->
+                    <li class="span3">
+                        <a class="thumbnail" rel="lightbox[group]" href="img/pics/7.jpg"><img class="group1" src="img/pics/7.jpg" title="Image Title" /></a>
+                    </li> <!--end thumb -->
+                    <li class="span3">
+                        <a class="thumbnail" rel="lightbox[group]" href="img/pics/8.jpg"><img class="group1" src="img/pics/8.jpg" title="Image Title" /></a>
+                    </li> <!--end thumb -->
+            </ul><!--end thumbnails -->
+
+
+
+
+
+
+  <!--
+	<button ng-click="getAlbums()">GET ALBUMS</button>
+	<button ng-click="getTags()">GET Tags</button>
+	<button ng-click="getLatestPhotos(5)">GET Latest photos</button>
+-->
+	<section id="albums" class="container gallery">
+            <ul class="thumbnails" ng-repeat="item in latestPhotos">
+			<div ng-include="'album-block.html'"></div>    
+		</ul>
+	</section>
+
+		<script type="text/ng-template" id="album-block.html"> 
+			<li class="span3>
+					<a ng-href="/#/photos/album-id/{{item.id}}" class="thumbnail">
+						<img data-src="/assets/holder.js/160x120" src="{{item.thumb.src}}" alt="" class="group1" />
+						<h3>{{item.title}}</h3>
+						<p>{{title.descr}}</p>
+					</a>
+			</li>
+		</script>
+</div>
+
