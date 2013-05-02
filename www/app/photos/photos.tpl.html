@@ -4,23 +4,31 @@
 	<a href="/#/home">ZPET NA ALBA</a>
 
 	<section id="photos">
-		<div id="list" ng-repeat="item in photos">
-			<ul class="thumbnails">
-				<div ng-include="'photo-block.html'"></div>    
-			</ul>
-		</div>
-
 		<script type="text/ng-template" id="photo-block.html"> 
-			<li class="span4">
-				<div class="thumbnail">
+			<div class="thumbnail">
 					<a ng-href="/#/photo/{{item.id}}" class="thumbnail">
 						<img data-src="/assets/holder.js/300x200" src="{{item.thumb.src}}" alt="" />
 						<h3>{{item.title}}</h3>
 						<p>{{title.descr}}</p>
 					</a>
-				</div>
-			</li>
+			</div>
 		</script>
+
+		<ul class="thumbnails">
+			<li class="span4" ng-repeat="item in photos.items">
+				<picasa-photo data="item" include="photo-block.html">
+					<div class="thumbnail">
+							<a ng-href="/#/photo/{{data.id}}" class="thumbnail">
+								<img data-src="/assets/holder.js/300x200" src="{{data.thumb.src}}" alt="" />
+								<h3>{{data.title}}</h3>
+								<p>{{data.descr}}</p>
+							</a>
+					</div>
+				</picasa-photo>
+			</li>
+			<button ng-click="getNextItems(photos)">Dalsi</button>
+		</ul>
+
 	</section>
 </div>
 

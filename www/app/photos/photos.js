@@ -57,13 +57,40 @@ angular.module( 'gury.photos', [
 		});
 	}
 	else if(type == "albumid") {
-		picasaService.getPhotos({'max-results': 40, user: 'dunsun', 'albumid': $routeParams.val}).then(function(data) {
+		picasaService.getPhotos({'max-results': 20, user: 'dunsun', 'albumid': $routeParams.val}).then(function(data) {
 			$scope.photos = data;
 			console.log('prijely fota by albumid');
 			console.log(data);
 		});
 	}
 
+	$scope.getNextItemsAbsUrl = function() {
+		var last = $scope.photos.length;
+		last = last > 0 ? last - 1 : 0;
+
+		console.log($scope.photos[last]);
+
+		return 'neco';
+	};
+
+
+	// will fetch next items (photos) from google
+	$scope.getNextItems = function(data) {
+		console.log(data);
+		if(data && data.nextLink) {
+			picasaService.getPhotos({ nextLink: data.nextLink }).then(function(data) {
+				if($scope.photos && $scope.photos.items.length > 0) {
+					angular.forEach(data.items, function(item) {
+						$scope.photos.items.push(item);
+					});
+				}
+				else {
+					$scope.photos = data;
+				}
+			});
+		}
+	}
+		
 
 	$scope.getAlbums = function() {
 		console.log('jede');

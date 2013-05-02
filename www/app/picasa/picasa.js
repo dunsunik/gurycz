@@ -49,6 +49,34 @@ angular.module('gury.picasa', [])
     };
   }])
 
+
+// directive
+.directive('picasaPhoto', ['picasaService', '$compile', function(picasaService, $compile, $eval) {
+    return {
+      restrict: 'E',
+      replace: true,
+	scope: {
+		origData: '=data'
+	},
+      link: function(scope, elm, attrs) {
+		scope.data = {
+			id: scope.origData.id,
+			title: scope.origData.title,
+			descr: scope.origData.description,
+			dateCreated: scope.origData.published,
+			thumb: {
+				src: (scope.origData.media.thumbnails && scope.origData.media.thumbnails.length > 0 ? scope.origData.media.thumbnails[0] : ''),
+				alt: scope.origData.title
+			},
+			image: {
+				src: ''
+			},
+			selfLink: scope.origData.selfLink
+		};
+      }
+    };
+  }])
+
 // service
 .factory('picasaService', ['$http', '$q', function($http, $q) {
 	// default options
@@ -202,7 +230,7 @@ angular.module('gury.picasa', [])
 
 	// params: user, max-results
 	getAlbums: function(params) {
-		var url = urls.albums(params);
+		var url = params && params.absUrl ? params.absUrl : urls.albums(params);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
 			console.log(data.data.items);
@@ -233,30 +261,12 @@ angular.module('gury.picasa', [])
 
 	// params: user, albumid, max-results
 	getPhotos: function(params) {
-		var url = urls.photos(params);
+		var url = params && params.nextLink ? params.nextLink + '&callback=JSON_CALLBACK' : urls.photos(params);
+		console.log(url);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
-			console.log(data);
-			var items = [];
-			angular.forEach(data.data.items, function(item) {
-				if(!item.type) {
-					console.log(item);
-					items.push(
-						{
-						id: item.id,
-						title: item.title,
-						descr: item.description,
-						dateCreated: item.published,
-						thumb: {
-							src: (item.media.thumbnails && item.media.thumbnails.length > 0 ? item.media.thumbnails[0] : ''),
-							alt: item.title
-						},
-						selfLink: item.selfLink
-						}
-					);
-				}
-			});
-			d.resolve(items);
+				console.log(data);
+			d.resolve(data.data);
 		});
 		return d.promise;
 	},
