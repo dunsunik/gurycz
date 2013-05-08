@@ -2,21 +2,23 @@ angular.module('gury.picasa', ['gury.base'])
 
 // http://jsfiddle.net/pmKpG/19/
 
-.directive('onScrollVisible', ['picasaService', '$compile', 'Working', function(picasaService, $compile, Working) {
+.directive('onScrollNext', ['picasaService', '$compile', 'Working', function(picasaService, $compile, Working) {
 return {
       restrict: 'A',
 	scope: {
-		fn: '&',
-		onScrollVisible: '&'
+		onScrollNext: '&',
+		onScrollNextWorking: '@'
 	},
       link: function(scope, elm, attrs) {
 		$(window.document).bind('scroll', function(event) {
 			var heightOffset = 0;
 			var isVisible = $(window).scrollTop() + $(window).height() + heightOffset >= $(document).height() - $(elm).height() ? true : false;
-			if(isVisible && !Working.isWorking('picasaLoading')) {
-				if(angular.isDefined(attrs.onScrollVisible)) {
+			console.log(scope.onScrollNextWorking);
+			if(isVisible && !Working.isWorking(scope.onScrollNextWorking)) {
+				if(angular.isDefined(attrs.onScrollNext)) {
 					scope.$apply(function() {
-						scope.onScrollVisible();
+						Working.set(scope.onScrollNextWorking);
+						scope.onScrollNext();
 					});
 				}
 			}

@@ -18,8 +18,9 @@
 			<li class="span4" ng-repeat="item in photos.items">
 				<picasa-photo data="item|picasaItemData:'photo'" include="photo-block.html"/>
 			</li>
-			<button ng-click="getNextItems(photos)" on-scroll-visible="getNextItems(photos)">Dalsi</button>
 		</ul>
+
+		<button ng-click="getNextItems(photos)" on-scroll-next="getNextItems(photos)" on-scroll-next-working="picasaLoading">Dalsi</button>
 	</section>
 </div>
 
