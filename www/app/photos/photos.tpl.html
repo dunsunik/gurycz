@@ -1,34 +1,25 @@
+<script type="text/ng-template" id="photo-block.html"> 
+	<div class="thumbnail">
+		<a ng-href="/#/photo/{{data.id}}" class="thumbnail">
+			<img ng-src="{{data.thumb.src}}" alt="" />
+			<h3>{{data.title}}</h3>
+			<p>{{data.description}}</p>
+		</a>
+	</div>
+</script>
+
 <div class="jumbotron">
 	<h1></h1>
 
 	<a href="/#/home">ZPET NA ALBA</a>
 
 	<section id="photos">
-		<script type="text/ng-template" id="photo-block.html"> 
-			<div class="thumbnail">
-					<a ng-href="/#/photo/{{item.id}}" class="thumbnail">
-						<img data-src="/assets/holder.js/300x200" src="{{item.thumb.src}}" alt="" />
-						<h3>{{item.title}}</h3>
-						<p>{{title.descr}}</p>
-					</a>
-			</div>
-		</script>
-
 		<ul class="thumbnails">
 			<li class="span4" ng-repeat="item in photos.items">
-				<picasa-photo data="item" include="photo-block.html">
-					<div class="thumbnail">
-							<a ng-href="/#/photo/{{data.id}}" class="thumbnail">
-								<img data-src="/assets/holder.js/300x200" src="{{data.thumb.src}}" alt="" />
-								<h3>{{data.title}}</h3>
-								<p>{{data.descr}}</p>
-							</a>
-					</div>
-				</picasa-photo>
+				<picasa-photo data="item|picasaItemData:'photo'" include="photo-block.html"/>
 			</li>
-			<button ng-click="getNextItems(photos)">Dalsi</button>
+			<button ng-click="getNextItems(photos)" on-scroll-visible="getNextItems(photos)">Dalsi</button>
 		</ul>
-
 	</section>
 </div>
 

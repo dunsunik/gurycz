@@ -1,23 +1,24 @@
+<script type="text/ng-template" id="photo-block.html"> 
+	<div class="thumbnail">
+		<a ng-href="/#/photos/albumid/{{data.id}}" class="thumbnail">
+			<img ng-src="{{data.thumb.src}}" alt="" />
+			<h3 class="feature">{{data.title}}</h3>
+			<p>{{data.description}}</p>
+		</a>
+	</div>
+</script>
+
 <div >
 	<h1></h1>
 
 	<a href="/#/home">ZPET NA ALBA</a>
 
 	<section id="photos">
-		<div id="list" ng-repeat="item in albums" class="gallery container">
-			<ul class="thumbnails">
-				<li class="span6" ng-include="'album-block.html'">
-				</li>
-			</ul>
-		</div>
-
-		<script type="text/ng-template" id="album-block.html"> 
-				<a ng-href="/#/photos/albumid/{{item.id}}" class="thumbnail">
-					<img  src="{{item.thumb.src}}" alt="" class="group1"/>
-					<h3>{{item.title}}</h3>
-					<p>{{title.descr}}</p>
-				</a>
-		</script>
+		<ul class="row-fluid">																					 
+			<li class="span3" ng-repeat="item in albums.items">
+				<picasa-photo data="item|picasaItemData:'album'" include="photo-block.html"/>
+			</li>
+		</ul>
 	</section>
 </div>
 

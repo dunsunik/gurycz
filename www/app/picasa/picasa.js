@@ -1,84 +1,58 @@
-angular.module('gury.picasa', [])
+angular.module('gury.picasa', ['gury.base'])
 
-// directive
-.directive('picasa', ['picasaService', function(picasaService) {
-    return {
-      //works on attribute
+// http://jsfiddle.net/pmKpG/19/
+
+.directive('onScrollVisible', ['picasaService', '$compile', 'Working', function(picasaService, $compile, Working) {
+return {
       restrict: 'A',
-      replace: true,
-      scope: {},
-      template: '<div ng-show="ready"><div class="picasa-photo"><img src="{{current.url}}" height="{{height}}" width="{{width}}"></div>' +
-                          '<div class="picasa-thumbs" ng-mousemove="move($event)">' +
-                          '<ul ng-repeat="photo in photos">' + 
-                          '<li><a ng-mouseover="setCurrent(photo)"><img src="{{photo.thumb}}" height="{{thumbHeight}}" width="{{thumbWidth}}"></a></li>' + 
-                          '</ul>' + 
-                          '</div></div>',
-      link: function(scope, element, attrs) {
-        scope.height = attrs.height;
-        scope.width = attrs.width;
-        scope.thumbWidth = attrs.thumbWidth;
-        scope.thumbHeight = attrs.thumbHeight;
-
-        picasaService.get(attrs.picasa).then(function(data) {
-          scope.photos = data;
-          scope.current = picasaService.current();
-          scope.ready = true;
-        });
-
-        scope.setCurrent = function(photo) {
-          scope.current = photo;
-        };
-
-        scope.move = function(event) {
-          var thumbDiv = element[0].lastChild;
-          var x = event.clientX - thumbDiv.offsetLeft;
-          var center = thumbDiv.offsetWidth / 2;
-          var factor = 20;
-
-          var delta = (x - center)/center * factor;
-
-          if (delta > 0 && thumbDiv.scrollLeft < (thumbDiv.scrollWidth - thumbDiv.clientWidth)) {
-              thumbDiv.scrollLeft += delta;
-          }
-          if (delta < 0 && thumbDiv.scrollLeft > 0) {
-              thumbDiv.scrollLeft += delta;
-          }
-        };
-
+	scope: {
+		fn: '&',
+		onScrollVisible: '&'
+	},
+      link: function(scope, elm, attrs) {
+		$(window.document).bind('scroll', function(event) {
+			var heightOffset = 0;
+			var isVisible = $(window).scrollTop() + $(window).height() + heightOffset >= $(document).height() - $(elm).height() ? true : false;
+			if(isVisible && !Working.isWorking('picasaLoading')) {
+				if(angular.isDefined(attrs.onScrollVisible)) {
+					scope.$apply(function() {
+						scope.onScrollVisible();
+					});
+				}
+			}
+		});
       }
-    };
-  }])
-
+};
+}])
 
 // directive
-.directive('picasaPhoto', ['picasaService', '$compile', function(picasaService, $compile, $eval) {
+.directive('picasaPhoto', ['picasaService', '$compile', function(picasaService, $compile) {
     return {
       restrict: 'E',
       replace: true,
 	scope: {
-		origData: '=data'
+		data: '='
+	},
+	templateUrl: function(elm, attrs) {
+		return attrs.include;
 	},
       link: function(scope, elm, attrs) {
-		scope.data = {
-			id: scope.origData.id,
-			title: scope.origData.title,
-			descr: scope.origData.description,
-			dateCreated: scope.origData.published,
-			thumb: {
-				src: (scope.origData.media.thumbnails && scope.origData.media.thumbnails.length > 0 ? scope.origData.media.thumbnails[0] : ''),
-				alt: scope.origData.title
-			},
-			image: {
-				src: ''
-			},
-			selfLink: scope.origData.selfLink
+		/*
+		scope.data.thumb = {
+			src: (scope.data.media.thumbnails && scope.data.media.thumbnails.length > 0 ? scope.data.media.thumbnails[0] : ''),
+			alt: scope.data.title
 		};
+
+		scope.data.image = {
+			src: ''
+		};
+		*/
       }
     };
-  }])
+}])
 
 // service
-.factory('picasaService', ['$http', '$q', function($http, $q) {
+.factory('picasaService', ['$http', '$q', 'Working', function($http, $q, Working) {
 	// default options
 	var opts = {
 		// access private or public
@@ -96,52 +70,9 @@ angular.module('gury.picasa', [])
 		user: 'dunsun',
 		hide_albums: ['Profile Photos', 'scrapBook', 'instantUpload', 'Photos from posts']
 	};	
-		
 
-    $http.defaults.useXDomain = true;
+	$http.defaults.useXDomain = true;
     
-    var current = $q.defer();
-
-    function parsePhoto(entry) {
-      var lastThumb = entry.media$group.media$thumbnail.length - 1;
-      var photo = {
-        thumb: entry.media$group.media$thumbnail[lastThumb].url,
-        thumbHeight: entry.media$group.media$thumbnail[lastThumb].height,
-        thumbWidth: entry.media$group.media$thumbnail[lastThumb].width,
-        url: entry.media$group.media$content[0].url
-      };
-      return photo;
-    }
-    
-    function parsePhotos(url) {
-      var d = $q.defer();
-      var photo;
-      var photos = [];
-      loadPhotos(url).then(function(data) {
-        if (!data.feed) {
-          photos.push(parsePhoto(data.entry));
-        } else {
-          data.feed.entry.forEach(function(entry) {
-            photos.push(parsePhoto(entry));
-          });
-        }
-        console.log("resolving");
-        current.resolve(photos[0]);
-        d.resolve(photos);
-        console.log("resolving");
-        
-      });
-      return d.promise;
-    }
-
-    function loadPhotos(url) {
-      var d = $q.defer();
-      $http.jsonp(url + '?alt=json&kind=photo&hl=pl&imgmax=912&callback=JSON_CALLBACK').success(function(data, status) {
-        d.resolve(data);
-      });
-      return d.promise;
-    }
-
 	// url functions
 	var urls = {
 		// generate complete picasa request url
@@ -179,7 +110,7 @@ angular.module('gury.picasa', [])
 
 			// add all other &key=val parameters
 			angular.forEach(params, function (val, key) {
-				if(val != undefined) {
+				if(val !== undefined) {
 					url = url + '&' + key + '=' + val;
 				}
 			});
@@ -220,40 +151,25 @@ angular.module('gury.picasa', [])
 
     // Public API here
     return {
-      get : function (url) {
-        return parsePhotos(url);
-      },
-
-      current : function () {
-        return current.promise;
-      },
 
 	// params: user, max-results
 	getAlbums: function(params) {
+		Working.set('picasaLoading');
 		var url = params && params.absUrl ? params.absUrl : urls.albums(params);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
-			console.log(data.data.items);
+			// exclude special implicit picasa albums
 			var items = [];
 			angular.forEach(data.data.items, function(item) {
 				if(!item.type) {
-					console.log(item);
-					items.push(
-						{
-						id: item.id,
-						title: item.title,
-						descr: item.description,
-						dateCreated: item.published,
-						thumb: {
-							src: (item.media.thumbnails && item.media.thumbnails.length > 0 ? item.media.thumbnails[0] : ''),
-							alt: item.title
-						},
-						selfLink: item.selfLink
-						}
-					);
+					items.push(item);
 				}
 			});
-			d.resolve(items);
+			data.data.items = items;
+
+			Working.unset('picasaLoading');
+
+			d.resolve(data.data);
 		});
 
 		return d.promise;
@@ -261,11 +177,11 @@ angular.module('gury.picasa', [])
 
 	// params: user, albumid, max-results
 	getPhotos: function(params) {
+		Working.set('picasaLoading');
 		var url = params && params.nextLink ? params.nextLink + '&callback=JSON_CALLBACK' : urls.photos(params);
-		console.log(url);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
-				console.log(data);
+			Working.unset('picasaLoading');
 			d.resolve(data.data);
 		});
 		return d.promise;
@@ -286,4 +202,19 @@ angular.module('gury.picasa', [])
 		return d.promise;
 	}
     };
+}])
+
+.filter('picasaItemData', ['$http', '$q', function($http, $q) {
+	return function(input, type) {
+		input.thumb = {
+			src: (input.media.thumbnails && input.media.thumbnails.length > 0 ? input.media.thumbnails[0] : ''),
+			alt: input.title
+		};
+
+		input.image = {
+			src: ''
+		};
+
+		return input;
+	}
 }]);

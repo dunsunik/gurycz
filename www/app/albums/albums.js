@@ -22,6 +22,8 @@ angular.module( 'gury.albums', [
 
 	var albumsDataReady = function(data) {
 		$rootScope.albums = data;
+console.log("ALBUMS");
+console.log(data);
 	};
 
 	// get all albums and put them into a cache

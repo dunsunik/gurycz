@@ -89,9 +89,8 @@ angular.module( 'gury.photos', [
 				}
 			});
 		}
-	}
+	};
 		
-
 	$scope.getAlbums = function() {
 		console.log('jede');
 		console.log(picasaService);
