@@ -16,11 +16,14 @@
 	<section id="photos">
 		<ul class="thumbnails">
 			<li class="span4" ng-repeat="item in photos.items">
-				<picasa-photo data="item|picasaItemData:'photo'" include="photo-block.html"/>
+				<picasa-photo data="item" include="photo-block.html"/>
 			</li>
 		</ul>
 
-		<button ng-click="getNextItems(photos)" on-scroll-next="getNextItems(photos)" on-scroll-next-working="picasaLoading">Dalsi</button>
+		<br/><br/>
+		<button ng-click="getNextItems(photos)" on-scroll-next="getNextItems(photos)" on-scroll-is-loading="scrollIsLoadingPhotos">Dalsi</button>
+
+		<br/><br/><br/><br/>
 	</section>
 </div>
 

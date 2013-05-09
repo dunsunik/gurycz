@@ -34,44 +34,21 @@ angular.module( 'gury.hp', [
 .controller( 'HpCtrl', [ '$scope', '$rootScope', 'titleService', 'picasaService', 'cache', function HpController( $scope, $rootScope, titleService, picasaService, cache ) {
 	titleService.setTitle( 'Home' );
 
-	$scope.getAlbums = function() {
-		console.log('jede');
-		console.log(picasaService);
-		var promise = picasaService.getAlbums();
-		promise.then(function(data) {
-			$scope.albums = data;
-			console.log('OK');
-			console.log(data);
-		});
+	var albumsDataReady = function(data) {
+		$rootScope.albums = data;
 	};
-
-	$scope.getTags = function() {
-		console.log('jede');
-		console.log(picasaService);
-		var promise = picasaService.getTags();
-		promise.then(function(data) {
-			console.log('OK');
-			console.log(data);
-		});
-	};
-
-
-	// get 5 latest photos
-	var promise = picasaService.getLatestPhotos({'maxResults': 5, 'albumId': ''});
-	promise.then(function(data) {
-		$scope.latestPhotos = data;
-		$scope.albums = data;
-		console.log('OK');
-		console.log(data);
-	});
 
 	// get all albums and put them into a cache
-	if(cache.get('albums') === undefined) {
-		promise = picasaService.getAlbums();
-		promise.then(function(data) {
-			$rootScope.albums = data;
+	var albums = cache.get('albums');
+
+	if(!albums) {
+		var promise = picasaService.getAlbums({'max-results': 4}).then(function(data) {
 			cache.put('albums', data);
+			albumsDataReady(data);
 		});
+	}
+	else {
+		albumsDataReady(albums);
 	}
 
 /*		

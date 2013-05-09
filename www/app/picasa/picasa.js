@@ -2,30 +2,41 @@ angular.module('gury.picasa', ['gury.base'])
 
 // http://jsfiddle.net/pmKpG/19/
 
-.directive('onScrollNext', ['picasaService', '$compile', 'Working', function(picasaService, $compile, Working) {
+.directive('onScrollNext', ['picasaService', '$compile', 'Working', '$rootScope', function(picasaService, $compile, Working, $rootScope) {
 return {
       restrict: 'A',
-	scope: {
-		onScrollNext: '&',
-		onScrollNextWorking: '@'
-	},
       link: function(scope, elm, attrs) {
+		var workingName = attrs.onScrollIsLoading;
+		// var workingName = 'scrollIsLoadingPhotos';
+
 		$(window.document).bind('scroll', function(event) {
 			var heightOffset = 0;
 			var isVisible = $(window).scrollTop() + $(window).height() + heightOffset >= $(document).height() - $(elm).height() ? true : false;
-			console.log(scope.onScrollNextWorking);
-			if(isVisible && !Working.isWorking(scope.onScrollNextWorking)) {
+			if(isVisible && !Working.isWorking(workingName)) {
 				if(angular.isDefined(attrs.onScrollNext)) {
 					scope.$apply(function() {
-						Working.set(scope.onScrollNextWorking);
-						scope.onScrollNext();
+						console.log('loaduju dalsi:' + workingName);
+
+						// show loading
+						Working.set(workingName);
+
+						// call function
+						scope.$eval(attrs.onScrollNext);
 					});
 				}
 			}
 		});
-      }
+
+		// called function has finished it's job 
+		scope.$on('onScrollNextFinished', function(params) {
+			console.log('finishedloaduju dalsi:' +  workingName);
+			// hide loading
+			Working.unset(workingName);
+		});
+	}
 };
 }])
+
 
 // directive
 .directive('picasaPhoto', ['picasaService', '$compile', function(picasaService, $compile) {
@@ -39,22 +50,12 @@ return {
 		return attrs.include;
 	},
       link: function(scope, elm, attrs) {
-		/*
-		scope.data.thumb = {
-			src: (scope.data.media.thumbnails && scope.data.media.thumbnails.length > 0 ? scope.data.media.thumbnails[0] : ''),
-			alt: scope.data.title
-		};
-
-		scope.data.image = {
-			src: ''
-		};
-		*/
       }
     };
 }])
 
 // service
-.factory('picasaService', ['$http', '$q', 'Working', function($http, $q, Working) {
+.factory('picasaService', ['$http', '$q', 'Working', '$filter', function($http, $q, Working, $filter) {
 	// default options
 	var opts = {
 		// access private or public
@@ -69,7 +70,7 @@ return {
 		'max-results': 30,
 		// set overrideLayout to true if you want to handle the images and markup directly.
 		overrideLayout: false,
-		user: 'dunsun',
+		user: 'dun',
 		hide_albums: ['Profile Photos', 'scrapBook', 'instantUpload', 'Photos from posts']
 	};	
 
@@ -79,9 +80,16 @@ return {
 	var urls = {
 		// generate complete picasa request url
 		prepare : function(params) {
-
 			params = params ? params : {};
 
+			// delete all undefined params
+			$.each(params, function(key, val) {
+				if(val === undefined) {
+					delete(params[key]);
+				}
+			});
+
+			// merge second parameter to a first one
 			params = angular.extend({
 				'user': opts['user'],
 				'albumid': '',
@@ -100,11 +108,13 @@ return {
 			// user
 			if(params.user) {
 				url = url + 'user/' + params.user;
+				delete(params['user']);
 			}
 
 			// albumid
 			if(params.albumid) {
 				url = url + '/albumid/' + params.albumid;
+				delete(params['albumid']);
 			}
 
 			// picasa version 2
@@ -154,47 +164,51 @@ return {
     // Public API here
     return {
 
-	// params: user, max-results
+	// params: max-results
 	getAlbums: function(params) {
 		Working.set('picasaLoading');
 		var url = params && params.absUrl ? params.absUrl : urls.albums(params);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
-			// exclude special implicit picasa albums
-			var items = [];
-			angular.forEach(data.data.items, function(item) {
-				if(!item.type) {
-					items.push(item);
-				}
-			});
-			data.data.items = items;
-
+			// transform data with our filter - will exclude special picasa internal albums
+			data.data = $filter('picasaItemsFilter')(data.data, 'album');
 			Working.unset('picasaLoading');
-
 			d.resolve(data.data);
+		}).error(function(data, status) {
+			var errMsg = 'Chyba pri nahravani prosim obnovte stranku F5';
+			Working.unset('picasaLoading');
+			alert(errMsg);
+			d.reject(errMsg);
 		});
 
 		return d.promise;
 	},
 
-	// params: user, albumid, max-results
+	// params: albumid, max-results
 	getPhotos: function(params) {
 		Working.set('picasaLoading');
 		var url = params && params.nextLink ? params.nextLink + '&callback=JSON_CALLBACK' : urls.photos(params);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
+			// transform data with our filter
+			data.data = $filter('picasaItemsFilter')(data.data, 'photo');
 			Working.unset('picasaLoading');
 			d.resolve(data.data);
+		}).error(function(data, status) {
+			var errMsg = 'Chyba pri nahravani prosim obnovte stranku F5';
+			Working.unset('picasaLoading');
+			alert(errMsg);
+			d.reject(errMsg);
 		});
 		return d.promise;
 	},
 
-	// params: user, albumid, max-results,
+	// params: albumid, max-results,
 	getLatestPhotos: function(params) {
 		return this.getPhotos(params);
 	},
 
-	// params: user, albumid, max-results
+	// params: albumid, max-results
 	getTags: function(params) {
 		var url = urls.tags(params);
 		var d = $q.defer();
@@ -202,11 +216,50 @@ return {
 			d.resolve(data);
 		});
 		return d.promise;
+	},
+
+	// override default picasa opts
+	setOpts: function(params) {
+		params = params ? params : {};
+		opts = angular.extend(opts, params);
+	},
+
+	// get opts object
+	getOpts: function() {
+		return opts;
 	}
+	
     };
 }])
 
-.filter('picasaItemData', ['$http', '$q', function($http, $q) {
+// input = data.items  (array of photos)
+// type = 'photo', 'album'
+.filter('picasaItemsFilter', ['$filter', function($filter) {
+	return function(input, type) {
+		if(input && input.items) {
+			var outItems = [];
+			angular.forEach(input.items, function(item) {
+				// album filter
+				if(type=="album") {
+					// do not include special picasa internal default albums
+					if(!item.type) {
+						outItems.push($filter('picasaItemFilter')(item, type));
+					}
+				}
+				// photo filter
+				else if(type=="photo") {
+					outItems.push($filter('picasaItemFilter')(item, type));
+				}
+			});
+			input.items = outItems;
+		}
+		return input;
+	};
+}])
+
+// input = data.items.item  (photo)
+// type = 'photo', 'album'
+.filter('picasaItemFilter', ['$http', function($http) {
 	return function(input, type) {
 		input.thumb = {
 			src: (input.media.thumbnails && input.media.thumbnails.length > 0 ? input.media.thumbnails[0] : ''),
@@ -218,5 +271,5 @@ return {
 		};
 
 		return input;
-	}
+	};
 }]);

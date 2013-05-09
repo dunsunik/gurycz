@@ -33,31 +33,31 @@ angular.module( 'gury.photos', [
 /**
  * And of course we define a controller for our route.
  */
-.controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', function PhotosController( $scope, titleService, picasaService, $routeParams ) {
+.controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'Working', function PhotosController( $scope, titleService, picasaService, $routeParams, Working ) {
 	titleService.setTitle( 'Photos' );
 
 	// type - tag, latest, album
 	var type = $routeParams.type;
 	$scope.type = $routeParams.type;
 
-	console.log('tag:' + $routeParams.val);
-
 	// show photos for a specified tag
 	if(type == "tag") {
-		picasaService.getPhotos({'max-results': 6, user: 'dunsun', tag: $routeParams.val}).then(function(data) {
+		picasaService.getPhotos({'max-results': 6, tag: $routeParams.val}).then(function(data) {
 			console.log('prijely fota by tag');
 			console.log(data);
 			$scope.photos = data;
 		});
 	}
+	// show latest photos
 	else if(type == "latest") {
-		picasaService.getPhotos({'max-results': 4, user: 'dunsun', tag: $routeParams.val}).then(function(data) {
+		picasaService.getPhotos({'max-results': 4, tag: $routeParams.val}).then(function(data) {
 			console.log('prijely fota latest');
 			console.log(data);
 		});
 	}
+	// show photos in a specified album
 	else if(type == "albumid") {
-		picasaService.getPhotos({'max-results': 20, user: 'dunsun', 'albumid': $routeParams.val}).then(function(data) {
+		picasaService.getPhotos({'max-results': 20, 'albumid': $routeParams.val}).then(function(data) {
 			$scope.photos = data;
 			console.log('prijely fota by albumid');
 			console.log(data);
@@ -76,9 +76,10 @@ angular.module( 'gury.photos', [
 
 	// will fetch next items (photos) from google
 	$scope.getNextItems = function(data) {
-		console.log(data);
+		console.log('fetchuju');
 		if(data && data.nextLink) {
 			picasaService.getPhotos({ nextLink: data.nextLink }).then(function(data) {
+				// if there are some photos already append newly responded photos to it
 				if($scope.photos && $scope.photos.items.length > 0) {
 					angular.forEach(data.items, function(item) {
 						$scope.photos.items.push(item);
@@ -87,6 +88,9 @@ angular.module( 'gury.photos', [
 				else {
 					$scope.photos = data;
 				}
+
+				// execute all $on listeners
+				$scope.$broadcast('onScrollNextFinished', data);
 			});
 		}
 	};

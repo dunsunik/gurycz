@@ -34,18 +34,14 @@
 	</script>
 </head>
 
-<body>
+<body ng-class="{'global-is-loading': isWorking()}">
 	<!-- Gury.cz logo -->
-	<div id="logo" class="affix-top"><a href="#/home"><img src="assets/gurycz-full.png" /></a></div>
+	<div id="logo" class="affix-top"><a href="#/hp"><img src="assets/gurycz-full.png" /></a></div>
 
 	<div id="wallpaper"></div>
 	<div id="overlay"></div>
-
-	<div id="loading-global" ng-hide="$Working.isWorking('loading-global')">
-		<div class="loading-global-inner">
-			<img src="assets/ajax-loader.gif" alt="loading" />
-		</div>
-	</div>
+	
+	<div id="loading-global" ng-show="isWorking()"><a href="" ng-click="resetAllLoadings()"><span>Zavřít</span></a></div>
 
 	<!-- header menu -->
 <!--

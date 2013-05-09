@@ -22,15 +22,13 @@ angular.module( 'gury.albums', [
 
 	var albumsDataReady = function(data) {
 		$rootScope.albums = data;
-console.log("ALBUMS");
-console.log(data);
 	};
 
 	// get all albums and put them into a cache
 	var albums = cache.get('albums');
 
 	if(!albums) {
-		var promise = picasaService.getAlbums({'max-results': 4, user: 'dunsun'}).then(function(data) {
+		var promise = picasaService.getAlbums({'max-results': 4}).then(function(data) {
 			cache.put('albums', data);
 			albumsDataReady(data);
 		});
