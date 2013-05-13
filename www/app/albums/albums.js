@@ -20,6 +20,8 @@ angular.module( 'gury.albums', [
 .controller( 'AlbumsCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'cache', '$rootScope', function PhotosController( $scope, titleService, picasaService, $routeParams, cache, $rootScope ) {
 	titleService.setTitle( 'Albumy' );
 
+	$(window.document).off( "scroll");
+
 	var albumsDataReady = function(data) {
 		$rootScope.albums = data;
 	};

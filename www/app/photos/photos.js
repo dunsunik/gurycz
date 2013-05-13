@@ -40,12 +40,15 @@ angular.module( 'gury.photos', [
 	var type = $routeParams.type;
 	$scope.type = $routeParams.type;
 
+	$scope.photosData = undefined;
+
 	// show photos for a specified tag
 	if(type == "tag") {
-		picasaService.getPhotos({'max-results': 6, tag: $routeParams.val}).then(function(data) {
+		picasaService.getPhotos({'max-results': 6, tag: $routeParams.val, picasaWorking: 'picasaWorking'}).then(function(data) {
 			console.log('prijely fota by tag');
 			console.log(data);
-			$scope.photos = data;
+			$scope.photosData = data;
+			$scope.resetActPhotoIndexToZero();
 		});
 	}
 	// show latest photos
@@ -53,16 +56,57 @@ angular.module( 'gury.photos', [
 		picasaService.getPhotos({'max-results': 4, tag: $routeParams.val}).then(function(data) {
 			console.log('prijely fota latest');
 			console.log(data);
+			$scope.resetActPhotoIndexToZero();
 		});
 	}
 	// show photos in a specified album
 	else if(type == "albumid") {
-		picasaService.getPhotos({'max-results': 20, 'albumid': $routeParams.val}).then(function(data) {
-			$scope.photos = data;
+		picasaService.getPhotos({'max-results': 20, 'albumid': $routeParams.val, picasaWorking: 'picasaWorking'}).then(function(data) {
+			$scope.photosData = data;
 			console.log('prijely fota by albumid');
 			console.log(data);
+			$scope.resetActPhotoIndexToZero();
+			console.log('index:' + $scope.actPhotoIndex);
 		});
 	}
+
+
+	// modal dialog settings
+	$scope.modalOpts = {
+		backdropFade: true,
+		dialogFade:true
+	};
+
+	// get photos items array - just a shortcut for $scope.photosData.items
+	var photos = function() {
+		return $scope.photosData && $scope.photosData.items ? $scope.photosData.items : [];
+	};
+
+	// set act photo index to 0
+	$scope.resetActPhotoIndexToZero = function() {
+		if(photos() && photos().length > 0) {
+			$scope.actPhotoIndex = 0;
+		}
+	};
+
+	// get actual photo data
+	$scope.actPhoto = function() {
+		console.log($scope.actPhotoIndex);
+		return photos()[$scope.actPhotoIndex];
+	};
+
+	// move onto a next photo and get it's data
+	$scope.nextPhoto = function() {
+		$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
+		return $scope.actPhoto();
+	};
+
+	// move onto a previous photo and get it's data
+	$scope.prevPhoto = function() {
+		$scope.actPhotoIndex = $scope.actPhotoIndex <= 0 ? 0 :  $scope.actPhotoIndex - 1;
+		return $scope.actPhoto();
+	};
+
 
 	$scope.getNextItemsAbsUrl = function() {
 		var last = $scope.photos.length;
@@ -78,21 +122,27 @@ angular.module( 'gury.photos', [
 	$scope.getNextItems = function(data) {
 		console.log('fetchuju');
 		if(data && data.nextLink) {
-			picasaService.getPhotos({ nextLink: data.nextLink }).then(function(data) {
+			picasaService.getPhotos({ nextLink: data.nextLink, picasaWorking: 'picasaWorking' }).then(function(data) {
 				// if there are some photos already append newly responded photos to it
-				if($scope.photos && $scope.photos.items.length > 0) {
+				if(photos().length > 0) {
 					angular.forEach(data.items, function(item) {
-						$scope.photos.items.push(item);
+						photos().push(item);
 					});
 				}
+				// there are no photos on a screen yet
 				else {
-					$scope.photos = data;
+					$scope.photosData = data;
 				}
 
-				// execute all $on listeners
-				$scope.$broadcast('onScrollNextFinished', data);
+				$scope.photosData.nextLink = data.nextLink;
+			}, function() {
 			});
 		}
+	};
+
+	// infinite scroll is disabled if we are alreading fetching photos or if there are no more photos
+	$scope.scrollIsDisabled = function() {
+		return Working.isWorking('picasaLoading') || !($scope.photosData && $scope.photosData.nextLink && $scope.photosData.nextLink.length > 0) ? true : false;
 	};
 		
 	$scope.getAlbums = function() {
@@ -135,6 +185,15 @@ angular.module( 'gury.photos', [
 			console.log('OK');
 			console.log(data);
 		});
+	};
+
+	$scope.openPhoto = function(data) {
+		console.log(data);
+		$scope.modalIsVisible = true;
+	};
+
+	$scope.closePhoto = function() {
+		$scope.modalIsVisible = false;
 	};
 
 		

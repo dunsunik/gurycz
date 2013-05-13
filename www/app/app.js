@@ -12,7 +12,7 @@ angular.module( 'gury', [
 ]).
 
 config( function myAppConfig ( $routeProvider ) {
-	$routeProvider.otherwise({ redirectTo: '/portfolio' });
+	$routeProvider.otherwise({ redirectTo: '/hp' });
 }).
 
 run([ 'titleService', '$rootScope', 'picasaService', 'Working', function run ( titleService, $rootScope, picasaService, Working ) {
@@ -21,13 +21,12 @@ run([ 'titleService', '$rootScope', 'picasaService', 'Working', function run ( t
 
 	titleService.setSuffix( ' | gury' );
 
-	$rootScope.$watch("Working.isWorking('scrollIsLoadingPhotos')", function(val) {
-		console.log('loadingggggggg');
+	$rootScope.$watch('isWorking', function(val) {
+		console.log('loading:' + val);
 	});
 
-
 	$rootScope.isWorking = function() {
-		return Working.isWorking('picasaLoading') || Working.isWorking('scrollIsLoadingPhotos') ? true : false;
+		return Working.isWorking('picasaWorking') || Working.isWorking('scrollIsLoadingPhotos') ? true : false;
 	};
 
 	$rootScope.resetAllLoadings = function() {
@@ -42,6 +41,10 @@ run([ 'titleService', '$rootScope', 'picasaService', 'Working', function run ( t
 
 	$rootScope.hideWorking = function() {
 		Working.unset('loading-global');
+	};
+
+	$rootScope.scrollTop = function() {
+		$('html, body').animate({ scrollTop: 0 }, 500, function(){ });
 	};
 }]).
 

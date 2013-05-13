@@ -2,36 +2,55 @@ angular.module('gury.picasa', ['gury.base'])
 
 // http://jsfiddle.net/pmKpG/19/
 
-.directive('onScrollNext', ['picasaService', '$compile', 'Working', '$rootScope', function(picasaService, $compile, Working, $rootScope) {
+
+// inifiniteScroll
+.directive('infScroll', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
 return {
       restrict: 'A',
       link: function(scope, elm, attrs) {
-		var workingName = attrs.onScrollIsLoading;
-		// var workingName = 'scrollIsLoadingPhotos';
 
-		$(window.document).bind('scroll', function(event) {
-			var heightOffset = 0;
-			var isVisible = $(window).scrollTop() + $(window).height() + heightOffset >= $(document).height() - $(elm).height() ? true : false;
-			if(isVisible && !Working.isWorking(workingName)) {
-				if(angular.isDefined(attrs.onScrollNext)) {
+		var isDisabled = scope.$eval(attrs.infScrollIsDisabled);
+		var fn = attrs.infScroll;
+		var heightOffset = angular.isDefined(attrs.infScrollOffset) ? attrs.infScrollOffset : 0;
+
+		var isVisible = function(el) {
+			var docViewTop = $(window).scrollTop();
+			var docViewBottom = docViewTop + $(window).height();
+
+			var elemTop = $(el).offset().top;
+			var elemBottom = elemTop + $(el).height();
+
+			return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom) && (elemBottom <= docViewBottom) &&  (elemTop >= docViewTop) );
+		};
+
+		var handler = function() {
+			if(isVisible(elm) && !isDisabled && angular.isDefined(fn)) {
+				// if fn is a sync method
+				if($rootScope.$$phase) {
+					scope.$eval(fn);
+				}
+				// if fn is an async method
+				else {
 					scope.$apply(function() {
-						console.log('loaduju dalsi:' + workingName);
-
-						// show loading
-						Working.set(workingName);
-
-						// call function
-						scope.$eval(attrs.onScrollNext);
+						scope.$eval(fn);
 					});
 				}
 			}
+		};
+
+		scope.$watch(attrs.infScrollIsDisabled, function(isDisabledNewVal) {
+			isDisabled = isDisabledNewVal;
+			if(!isDisabledNewVal) {
+				handler();
+			}
 		});
 
-		// called function has finished it's job 
-		scope.$on('onScrollNextFinished', function(params) {
-			console.log('finishedloaduju dalsi:' +  workingName);
-			// hide loading
-			Working.unset(workingName);
+		$(window.document).on('scroll', function() {
+			handler();
+		});
+
+		scope.$on('destroy', function() {
+			$(window.document).off('scroll', handler);
 		});
 	}
 };
@@ -44,18 +63,23 @@ return {
       restrict: 'E',
       replace: true,
 	scope: {
-		data: '='
+		data: '=',
+		showPhotoBridge: '&'
 	},
 	templateUrl: function(elm, attrs) {
 		return attrs.include;
 	},
       link: function(scope, elm, attrs) {
+		scope.showPhotoBasic = function(data) {
+			console.log('super');
+			console.log(data);
+		};
       }
     };
 }])
 
 // service
-.factory('picasaService', ['$http', '$q', 'Working', '$filter', function($http, $q, Working, $filter) {
+.factory('picasaService', ['$http', '$q', 'Working', '$filter', '$rootScope', function($http, $q, Working, $filter, $rootScope) {
 	// default options
 	var opts = {
 		// access private or public
@@ -75,6 +99,20 @@ return {
 	};	
 
 	$http.defaults.useXDomain = true;
+
+	var picasaWorking = function(key, val) {
+		if(key !== undefined) {
+			// set
+			if(val !== undefined) {
+				Working.setOrUnset(key, val);
+			}
+			// get
+			else {
+				return Working.get(key);
+			}
+		}
+		return val;
+	};
     
 	// url functions
 	var urls = {
@@ -158,6 +196,7 @@ return {
 				'kind': 'tag'
 			});
 		}
+
 	};
 
 
@@ -166,17 +205,18 @@ return {
 
 	// params: max-results
 	getAlbums: function(params) {
-		Working.set('picasaLoading');
+		picasaWorking(params.picasaWorking, true);
+
 		var url = params && params.absUrl ? params.absUrl : urls.albums(params);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
 			// transform data with our filter - will exclude special picasa internal albums
 			data.data = $filter('picasaItemsFilter')(data.data, 'album');
-			Working.unset('picasaLoading');
+			picasaWorking(params.picasaWorking, false);
 			d.resolve(data.data);
 		}).error(function(data, status) {
 			var errMsg = 'Chyba pri nahravani prosim obnovte stranku F5';
-			Working.unset('picasaLoading');
+			picasaWorking(params.picasaWorking, false);
 			alert(errMsg);
 			d.reject(errMsg);
 		});
@@ -186,17 +226,17 @@ return {
 
 	// params: albumid, max-results
 	getPhotos: function(params) {
-		Working.set('picasaLoading');
+		picasaWorking(params.picasaWorking, true);
 		var url = params && params.nextLink ? params.nextLink + '&callback=JSON_CALLBACK' : urls.photos(params);
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
 			// transform data with our filter
 			data.data = $filter('picasaItemsFilter')(data.data, 'photo');
-			Working.unset('picasaLoading');
+			picasaWorking(params.picasaWorking, false);
 			d.resolve(data.data);
 		}).error(function(data, status) {
 			var errMsg = 'Chyba pri nahravani prosim obnovte stranku F5';
-			Working.unset('picasaLoading');
+			picasaWorking(params.picasaWorking, false);
 			alert(errMsg);
 			d.reject(errMsg);
 		});

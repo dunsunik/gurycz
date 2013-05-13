@@ -1,6 +1,6 @@
 <script type="text/ng-template" id="photo-block.html"> 
 	<div class="thumbnail">
-		<a ng-href="/#/photo/{{data.id}}" class="thumbnail">
+		<a class="thumbnail" ng-click="showPhotoBridge({data: data})">
 			<img ng-src="{{data.thumb.src}}" alt="" />
 			<h3>{{data.title}}</h3>
 			<p>{{data.description}}</p>
@@ -13,17 +13,35 @@
 
 	<a href="/#/home">ZPET NA ALBA</a>
 
+	<div modal="modalIsVisible" close="closePhoto()" options="modalOpts" >
+		<div>
+			<img ng-src="{{actPhoto().media.image.url}}"  />
+		</div>
+
+		<div class="modal-footer">
+			<div class="pull-left">{{actPhoto().title}}</div>
+
+			<button class="btn btn-warning cancel" ng-click="prevPhoto()">Prev</button>
+			<button class="btn btn-warning cancel" ng-click="nextPhoto()">Next</button>
+			<button class="btn btn-warning cancel" ng-click="closePhoto()">X</button>
+		</div>
+	</div>
+
 	<section id="photos">
 		<ul class="thumbnails">
-			<li class="span4" ng-repeat="item in photos.items">
-				<picasa-photo data="item" include="photo-block.html"/>
+			<li class="span4" ng-repeat="item in photosData.items">
+				<picasa-photo data="item" include="photo-block.html" show-photo-bridge="openPhoto(data)" />
 			</li>
 		</ul>
 
 		<br/><br/>
-		<button ng-click="getNextItems(photos)" on-scroll-next="getNextItems(photos)" on-scroll-is-loading="scrollIsLoadingPhotos">Dalsi</button>
+		<button ng-show="photosData.nextLink && photosData.nextLink.length > 0" ng-click="getNextItems(photosData)" inf-scroll="getNextItems(photosData)" inf-scroll-is-disabled="scrollIsDisabled()">Další fotky</button>
 
 		<br/><br/><br/><br/>
 	</section>
+
+
+
+
 </div>
 

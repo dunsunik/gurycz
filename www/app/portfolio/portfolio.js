@@ -34,7 +34,11 @@ angular.module( 'gury.portfolio', [
 .controller( 'PortfolioCtg', [ '$scope', '$rootScope', 'titleService', 'picasaService', 'cache', function HpController( $scope, $rootScope, titleService, picasaService, cache ) {
 	titleService.setTitle( 'Home' );
 
+	$(window.document).off( "scroll");
+
 	var promise;
+
+	/*
 
 	// get 5 latest photos
 	if(cache.get('latestTopPhotos') === undefined) {
@@ -47,6 +51,7 @@ angular.module( 'gury.portfolio', [
 	else {
 			$scope.latestPhotos = data;
 	}
+*/
 
 	// get all albums and put them into a cache
 	if(cache.get('albums') === undefined) {

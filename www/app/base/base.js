@@ -1,23 +1,55 @@
 angular.module('gury.base', [])
 
+// centerVertically
+
+.directive( 'centerVertically', [ '$location', '$timeout', function( $location, $timeout ) {
+  return {
+    link: function( scope, elm, attrs ) {
+	var offset = angular.isDefined(attrs.offsetTop) ? parseInt(attrs.offsetTop) + 0 : 0;
+
+	var handler = function() {
+		$(elm).css({
+			top: ((($(window).height() - $(elm).outerHeight()) / 2) + offset),
+			left: (($(window).width() - $(elm).outerWidth()) / 2)
+		});
+	};
+
+	$(window).resize(function(){
+		handler();
+	});
+
+	// force alement to be positioned absolute so that width and height are real element dimensions
+	$(elm).css('float', 'left');
+	$(elm).css('position', 'absolute');
+
+	// when ctrl+r page text was not aligned to a center this hacked it
+	$timeout(function() {	
+		$(elm).css('visibility', 'visible');
+		handler();
+	}, 500);
+    }
+  };
+}])
+
+
 // activeIfCurrent
 .directive( 'activeIfCurrent', [ '$location', function( $location ) {
   return {
     scope: true,
     link: function( scope, element, attrs ) {
-      var check = function check () {
-        var el = element.find( 'a' );
-        var path = $location.path();
-        var href = el.attr( 'href' );
-        if ( path === href || '#' + path === href ) {
-          element.addClass( 'active' );
-        } else {
-          element.removeClass( 'active' );
-        }
-      };
+	var check = function check () {
+	  var el = element.find( 'a' );
+	  var path = $location.path();
+	  var href = el.attr( 'href' );
+	  if ( path === href || '#' + path === href ) {
+	    element.addClass( 'active' );
+	  } else {
+	    element.removeClass( 'active' );
+	  }
+	};
 
-      scope.$on( '$routeChangeSuccess', check );
-      scope.$on( '$locationChangeSuccess', check );
+	scope.$on( '$routeChangeSuccess', check );
+	scope.$on( '$locationChangeSuccess', check );
     }
   };
 }])
@@ -28,22 +60,22 @@ angular.module('gury.base', [])
   
   var titleService = {
     setSuffix: function setSuffix ( s ) {
-      suffix = s;
+	suffix = s;
     },
     getSuffix: function getSuffix () {
-      return suffix;
+	return suffix;
     },
     setTitle: function setTitle ( t ) {
-      if ( angular.isDefined( suffix ) ) {
-        title = t + suffix;
-      } else {
-        title = t;
-      }
+	if ( angular.isDefined( suffix ) ) {
+	  title = t + suffix;
+	} else {
+	  title = t;
+	}
 
-      $document.prop( 'title', title );
+	$document.prop( 'title', title );
     },
     getTitle: function getTitle () {
-      return $document.prop( 'title' );
+	return $document.prop( 'title' );
     }
   };
 
@@ -344,7 +376,7 @@ factory('Validation', ['$rootScope', function($rootScope) {
 				if(!(val !== undefined && val.match(new RegExp(rules.regexp_match)))) {
 					return false;
 				}
-			}      
+			}	 
 		}
 
 		return true;
