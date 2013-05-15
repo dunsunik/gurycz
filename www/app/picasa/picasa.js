@@ -2,6 +2,34 @@ angular.module('gury.picasa', ['gury.base'])
 
 // http://jsfiddle.net/pmKpG/19/
 
+.directive('globalKeydown', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
+return {
+      restrict: 'A',
+      link: function(scope, elm, attrs) {
+		var keysEvents = scope.$eval(attrs.globalKeydown);
+		var enabled = scope.$eval(attrs.globalKeydownEnabled);
+
+		scope.$watch(attrs.globalKeydownEnabled, function(newVal) {
+			enabled = newVal;
+		});
+
+		$(document).keydown(function(e) {
+			if(enabled) {
+				var action = keysEvents[e.which];
+				if(action) {
+					scope.$apply(function() {
+						try {
+							scope.$eval(action);
+						}
+						catch(e) {
+						}
+					});
+				}
+			}
+		});
+	}
+};
+}])
 
 // inifiniteScroll
 .directive('infScroll', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
@@ -63,6 +91,7 @@ return {
       restrict: 'E',
       replace: true,
 	scope: {
+		index: '=',		
 		data: '=',
 		showPhotoBridge: '&'
 	},
@@ -272,7 +301,7 @@ return {
     };
 }])
 
-// input = data.items  (array of photos)
+// input = data  (hash responded from a google which byt the way contains array of items (photos))
 // type = 'photo', 'album'
 .filter('picasaItemsFilter', ['$filter', function($filter) {
 	return function(input, type) {

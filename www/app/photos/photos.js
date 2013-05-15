@@ -33,7 +33,7 @@ angular.module( 'gury.photos', [
 /**
  * And of course we define a controller for our route.
  */
-.controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'Working', function PhotosController( $scope, titleService, picasaService, $routeParams, Working ) {
+.controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'Working', '$q', function PhotosController( $scope, titleService, picasaService, $routeParams, Working, $q ) {
 	titleService.setTitle( 'Photos' );
 
 	// type - tag, latest, album
@@ -91,13 +91,22 @@ angular.module( 'gury.photos', [
 
 	// get actual photo data
 	$scope.actPhoto = function() {
-		console.log($scope.actPhotoIndex);
 		return photos()[$scope.actPhotoIndex];
 	};
 
 	// move onto a next photo and get it's data
 	$scope.nextPhoto = function() {
-		$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
+		// is last photo but has more pages -> fetch another photos
+		if($scope.isLastPhotoButHasMorePages()) {
+			var promise = $scope.getNextItems($scope.photosData, $q.defer());
+			promise.then(function(data) {
+				$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
+			});
+		}
+		// has more photos -> go to next photo
+		else if($scope.hasMorePhotos()) {
+			$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
+		}
 		return $scope.actPhoto();
 	};
 
@@ -112,15 +121,25 @@ angular.module( 'gury.photos', [
 		var last = $scope.photos.length;
 		last = last > 0 ? last - 1 : 0;
 
-		console.log($scope.photos[last]);
-
 		return 'neco';
 	};
 
 
+	$scope.hasMorePhotos = function() {
+		return $scope.actPhotoIndex + 1 < photos().length ? true : false;
+	};
+
+	$scope.isLastPhotoButHasMorePages = function() {
+		if(($scope.actPhotoIndex + 1 == photos().length) && $scope.photosData && $scope.photosData.nextLink && $scope.photosData.nextLink.length > 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	};
+
 	// will fetch next items (photos) from google
-	$scope.getNextItems = function(data) {
-		console.log('fetchuju');
+	$scope.getNextItems = function(data, defer) {
 		if(data && data.nextLink) {
 			picasaService.getPhotos({ nextLink: data.nextLink, picasaWorking: 'picasaWorking' }).then(function(data) {
 				// if there are some photos already append newly responded photos to it
@@ -135,8 +154,16 @@ angular.module( 'gury.photos', [
 				}
 
 				$scope.photosData.nextLink = data.nextLink;
+
+				if(defer) {
+					defer.resolve($scope.photosData);
+				}
 			}, function() {
+				defer.reject('Next photos could not be loaded');
 			});
+		}
+		if(defer) {
+			return defer.promise;
 		}
 	};
 
@@ -146,8 +173,6 @@ angular.module( 'gury.photos', [
 	};
 		
 	$scope.getAlbums = function() {
-		console.log('jede');
-		console.log(picasaService);
 		var promise = picasaService.getAlbums();
 		promise.then(function(data) {
 			$scope.albums = data;
@@ -187,8 +212,8 @@ angular.module( 'gury.photos', [
 		});
 	};
 
-	$scope.openPhoto = function(data) {
-		console.log(data);
+	$scope.openPhoto = function(index) {
+		$scope.actPhotoIndex = index;
 		$scope.modalIsVisible = true;
 	};
 

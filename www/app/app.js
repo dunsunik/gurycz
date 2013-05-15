@@ -1,5 +1,6 @@
 angular.module( 'gury', [
 	'ui.bootstrap',
+	'ui.directives',
 	'app-templates',
 	'component-templates',
 	'gury.base',
