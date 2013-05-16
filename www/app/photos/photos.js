@@ -74,7 +74,8 @@ angular.module( 'gury.photos', [
 	// modal dialog settings
 	$scope.modalOpts = {
 		backdropFade: true,
-		dialogFade:true
+		dialogFade:true,
+		dialogClass: 'dynamic-modal modal'
 	};
 
 	// get photos items array - just a shortcut for $scope.photosData.items
@@ -91,6 +92,7 @@ angular.module( 'gury.photos', [
 
 	// get actual photo data
 	$scope.actPhoto = function() {
+		console.log(photos()[$scope.actPhotoIndex]);
 		return photos()[$scope.actPhotoIndex];
 	};
 
@@ -219,6 +221,13 @@ angular.module( 'gury.photos', [
 
 	$scope.closePhoto = function() {
 		$scope.modalIsVisible = false;
+	};
+
+	$scope.resizeModal = function() {
+		console.log('resiszing');
+
+		console.log($scope.actPhoto().width);
+		console.log($scope.actPhoto().height);
 	};
 
 		

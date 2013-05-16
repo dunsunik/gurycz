@@ -12,6 +12,7 @@ module.exports = function ( grunt ) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-ngmin');
+  grunt.loadNpmTasks('grunt-rsync-2');
 
   /**
    * The `build` directory contains our custom Grunt tasks for using testacular
@@ -57,14 +58,14 @@ module.exports = function ( grunt ) {
      * pairs are evaluated based on this very configuration object.
      */
     meta: {
-      banner: 
-        '/**\n' +
-        ' * <%= pkg.title || pkg.name %> - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
-        ' * <%= pkg.homepage %>\n' +
-        ' *\n' +
-        ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
-        ' * Licensed <%= pkg.licenses.type %> <<%= pkg.licenses.url %>>\n' +
-        ' */\n'
+	banner: 
+	  '/**\n' +
+	  ' * <%= pkg.title || pkg.name %> - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+	  ' * <%= pkg.homepage %>\n' +
+	  ' *\n' +
+	  ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
+	  ' * Licensed <%= pkg.licenses.type %> <<%= pkg.licenses.url %>>\n' +
+	  ' */\n'
     },
 
 
@@ -78,16 +79,26 @@ module.exports = function ( grunt ) {
      * ! se musi davat zezadu inac nezafunguji
      */
     src: {
-      jsLibs: [ '<%= componentsdir %>/**/*.min.js', '!<%= componentsdir %>/json3/build.js', '<%= componentsdir %>/vegas/*.js',
-							'<%= vendordir %>/twitter-bootstrap/docs/assets/js/holder/holder.js',
-							'!<%= componentsdir %>/**/jquery.min.js',  '!<%= componentsdir %>/**/angular.min.js'], 
-      jsApp: [  '<%= srcdir %>/**/*.js', '!<%= srcdir %>/**/*.spec.js', '!<%= componentsdir %>/**/*' ], 
-      atpl: [ '<%= srcdir %>/app/**/*.tpl.html' ],
-      ctpl: [ '<%= componentsdir %>/**/*.tpl.html' ],
-      tpljs: [ '<%= distdir %>/tmp/**/*.js' ],
-      html: [ '<%= srcdir %>/index.html' ],
-      less:  '<%= srcdir %>/less/main.less',
-      unit: [ '<%= srcdir %>/**/*.spec.js' ]
+	jsLibs:	[	
+			'<%= vendordir %>/twitter-bootstrap/docs/assets/js/holder/holder.js',
+			'<%= componentsdir %>/jquery/jquery-migrate.min.js',
+			'<%= componentsdir %>/es5-shim/es5-shim.min.js',
+			'<%= componentsdir %>/es5-shim/es5-sham.min.js',
+			'<%= componentsdir %>/angular-cookies/angular-cookies.min.js', 
+			'<%= componentsdir %>/angular-resource/angular-resource.min.js',
+			'<%= componentsdir %>/angular-sanitize/angular-sanitiza.min.js',
+			'<%= componentsdir %>/hammerjs/dist/jquery.hammer.min.js',
+			'<%= componentsdir %>/angular-hammerjs/angular-hammer.js',
+			'<%= componentsdir %>/json3/lib/json3.min.js',
+			'<%= componentsdir %>/vegas/jquery.vegas.js'
+			], 
+	jsApp:	[ '<%= srcdir %>/**/*.js', '!<%= srcdir %>/**/*.spec.js', '!<%= componentsdir %>/**/*' ], 
+	atpl:		[ '<%= srcdir %>/app/**/*.tpl.html' ],
+	ctpl:		[ '<%= componentsdir %>/**/*.tpl.html' ],
+	tpljs:	[ '<%= distdir %>/tmp/**/*.js' ],
+	html:		[ '<%= srcdir %>/index.html' ],
+	less:		'<%= srcdir %>/less/main.less',
+	unit:		[ '<%= srcdir %>/**/*.spec.js' ]
     },
 
     /**
@@ -100,82 +111,82 @@ module.exports = function ( grunt ) {
      * project assets (images, fonts, etc.) into our distribution directory.
      */
     copy: {
-      assets: {
-        files: [
-          { 
-            src: [ '**' ],
-            dest: '<%= distdir %>/assets/',
-            cwd: '<%= srcdir %>/assets',
-            expand: true
-          },
-          { 
-            src: [ 'vegas/images/*', 'vegas/overlays/*' ],
-            dest: '<%= distdir %>/assets/',
-            cwd: '<%= componentsdir %>',
-            expand: true
-          },
-          { 
-            src: [ 'holder.js' ],
-            dest: '<%= distdir %>/assets/',
-            cwd: '<%= vendordir %>/twitter-bootstrap/docs/assets/js/holder',
-            expand: true
-          }
-       ]   
-      }
+	assets: {
+	  files: [
+	    { 
+		src: [ '**' ],
+		dest: '<%= distdir %>/assets/',
+		cwd: '<%= srcdir %>/assets',
+		expand: true
+	    },
+	    { 
+		src: [ 'vegas/images/*', 'vegas/overlays/*' ],
+		dest: '<%= distdir %>/assets/',
+		cwd: '<%= componentsdir %>',
+		expand: true
+	    },
+	    { 
+		src: [ 'holder.js' ],
+		dest: '<%= distdir %>/assets/',
+		cwd: '<%= vendordir %>/twitter-bootstrap/docs/assets/js/holder',
+		expand: true
+	    }
+	 ]   
+	}
     },
 
     /**
      * `grunt concat` concatenates multiple source files into a single file.
      */
     concat: {
-      /**
-       * The `dist` target is the concatenation of our application source code
-       * into a single file. All files matching what's in the `src.js`
-       * configuration property above will be included in the final build.
-       *
-       * In addition, the source is surrounded in the blocks specified in the
-       * `module.prefix` and `module.suffix` files, which are just run blocks
-       * to ensure nothing pollutes the global scope.
-       *
-       * The `options` array allows us to specify some customization for this
-       * operation. In this case, we are adding a banner to the top of the file,
-       * based on the above definition of `meta.banner`. This is simply a 
-       * comment with copyright informaiton.
-       */
-      dist: {
-        options: {
-          banner: '<%= meta.banner %>'
-        },
-        src: [ 'module.prefix', '<%= src.jsApp %>', '<%= src.tpljs %>', 'module.suffix' ],
-        dest: '<%= distdir %>/assets/<%= pkg.name %>.js'
-      },
+	/**
+	 * The `dist` target is the concatenation of our application source code
+	 * into a single file. All files matching what's in the `src.js`
+	 * configuration property above will be included in the final build.
+	 *
+	 * In addition, the source is surrounded in the blocks specified in the
+	 * `module.prefix` and `module.suffix` files, which are just run blocks
+	 * to ensure nothing pollutes the global scope.
+	 *
+	 * The `options` array allows us to specify some customization for this
+	 * operation. In this case, we are adding a banner to the top of the file,
+	 * based on the above definition of `meta.banner`. This is simply a 
+	 * comment with copyright informaiton.
+	 */
+	dist: {
+	  options: {
+	    banner: '<%= meta.banner %>'
+	  },
+	  src: [ 'module.prefix', '<%= src.jsApp %>', '<%= src.tpljs %>', 'module.suffix' ],
+	  dest: '<%= distdir %>/assets/<%= pkg.name %>.js'
+	},
 
-      /**
-       * The `libs` target is for all third-party libraries we need to include
-       * in the final distribution. They will be concatenated into a single
-       * `libs.js` file.  One could combine this with the above for a single
-       * payload, but then concatenation order will obviously be important to
-       * get right.
-       */
-      libs: {
-        src: [ 'module.prefix', '<%= src.jsLibs %>', 'module.suffix' ],
-        dest: '<%= distdir %>/assets/libs.js'
-      }
+	/**
+	 * The `libs` target is for all third-party libraries we need to include
+	 * in the final distribution. They will be concatenated into a single
+	 * `libs.js` file.  One could combine this with the above for a single
+	 * payload, but then concatenation order will obviously be important to
+	 * get right.
+	 */
+	libs: {
+	  src: [ 'module.prefix', '<%= src.jsLibs %>', 'module.suffix' ],
+	  dest: '<%= distdir %>/assets/libs.js'
+	}
     },
 
     /**
      * Minify the sources!
      */
     uglify: {
-      options: {
-        banner: '<%= meta.banner %>'
-      },
-      dist: {
-        files: {
-          '<%= distdir %>/assets/<%= pkg.name %>.min.js': [ '<%= distdir %>/assets/<%= pkg.name %>.js' ]
-          // '<%= distdir %>/assets/libs.min.js': [ '<%= distdir %>/assets/libs.js' ]
-        }
-      }
+	options: {
+	  banner: '<%= meta.banner %>'
+	},
+	dist: {
+	  files: {
+	    '<%= distdir %>/assets/<%= pkg.name %>.min.js': [ '<%= distdir %>/assets/<%= pkg.name %>.js' ]
+	    // '<%= distdir %>/assets/libs.min.js': [ '<%= distdir %>/assets/libs.js' ]
+	  }
+	}
     },
 
     /**
@@ -184,34 +195,34 @@ module.exports = function ( grunt ) {
      * imported from this file.
      */
     recess: {
-      build:  {
-        src: [ '<%= src.less %>' ],
-        dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
-        options: {
-          compile: true,
-          compress: false,
-          noUnderscores: false,
-          noIDs: false,
-          zeroUnits: false
-        }
-      }
+	build:  {
+	  src: [ '<%= src.less %>' ],
+	  dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
+	  options: {
+	    compile: true,
+	    compress: false,
+	    noUnderscores: false,
+	    noIDs: false,
+	    zeroUnits: false
+	  }
+	}
     },
 
     /**
      * When runing in development we do not compress since it costs too much time
      */
     recessdev: {
-      build:  {
-        src: [ '<%= src.less %>' ],
-        dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
-        options: {
-          compile: true,
-          compress: false,
-          noUnderscores: false,
-          noIDs: false,
-          zeroUnits: false
-        }
-      }
+	build:  {
+	  src: [ '<%= src.less %>' ],
+	  dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
+	  options: {
+	    compile: true,
+	    compress: false,
+	    noUnderscores: false,
+	    noIDs: false,
+	    zeroUnits: false
+	  }
+	}
     },
 
     /**
@@ -222,29 +233,29 @@ module.exports = function ( grunt ) {
      * with an exclamation point (!).
      */
     jshint: {
-      src: [ 
-        'Gruntfile.js', 
-        '<%= src.jsApp %>', 
-        '<%= src.tpljs %>',
-        '<%= src.unit %>',
-        '!<%= componentsdir %>/**/*'
-      ],
-      test: [
-        '<%= src.unit %>'
-      ],
-      gruntfile: [
-        'Gruntfile.js'
-      ],
-      options: {
-        curly: true,
-        immed: true,
-        newcap: true,
-        noarg: true,
-        sub: true,
-        boss: true,
-        eqnull: true
-      },
-      globals: {}
+	src: [ 
+	  'Gruntfile.js', 
+	  '<%= src.jsApp %>', 
+	  '<%= src.tpljs %>',
+	  '<%= src.unit %>',
+	  '!<%= componentsdir %>/**/*'
+	],
+	test: [
+	  '<%= src.unit %>'
+	],
+	gruntfile: [
+	  'Gruntfile.js'
+	],
+	options: {
+	  curly: true,
+	  immed: true,
+	  newcap: true,
+	  noarg: true,
+	  sub: true,
+	  boss: true,
+	  eqnull: true
+	},
+	globals: {}
     },
 
     /**
@@ -255,32 +266,32 @@ module.exports = function ( grunt ) {
      * of the initial payload as one JavaScript file. Neat!
      */
     html2js: {
-      /**
-       * These are the templates from `src/app`.
-       */
-      app: {
-        src: [ '<%= src.atpl %>' ],
-        base: '<%= srcdir %>/app',
-        dest: 'dist/tmp'
-      },
+	/**
+	 * These are the templates from `src/app`.
+	 */
+	app: {
+	  src: [ '<%= src.atpl %>' ],
+	  base: '<%= srcdir %>/app',
+	  dest: 'dist/tmp'
+	},
 
-      /**
-       * These are the templates from `src/components`.
-       */
-      component: {
-        src: [ '<%= src.ctpl %>' ],
-        base: '<%= componentsdir %>',
-        dest: 'dist/tmp'
-      }
+	/**
+	 * These are the templates from `src/components`.
+	 */
+	component: {
+	  src: [ '<%= src.ctpl %>' ],
+	  base: '<%= componentsdir %>',
+	  dest: 'dist/tmp'
+	}
     },
 
     /**
      * The Testacular configurations.
      */
     test: {
-      unit: {
-        conf: 'testacular/testacular-unit.js'
-      }
+	unit: {
+	  conf: 'testacular/testacular-unit.js'
+	}
     },
 
     /**
@@ -294,77 +305,77 @@ module.exports = function ( grunt ) {
      * But we don't need the same thing to happen for all the files. 
      */
     delta: {
-      /**
-       * When the Gruntfile changes, we just want to lint it. That said, the
-       * watch will have to be restarted if it should take advantage of any of
-       * the changes.
-       */
-      gruntfile: {
-        files: 'Gruntfile.js',
-        tasks: [ 'jshint:gruntfile' ]
-      },
+	/**
+	 * When the Gruntfile changes, we just want to lint it. That said, the
+	 * watch will have to be restarted if it should take advantage of any of
+	 * the changes.
+	 */
+	gruntfile: {
+	  files: 'Gruntfile.js',
+	  tasks: [ 'jshint:gruntfile' ]
+	},
 
-      /**
-       * When our source files change, we want to run most of our build tasks
-       * (excepting uglification).
-       */
-      src: {
-        files: [ 
-          '<%= src.jsApp %>',
-          '<%= src.jsLibs %>'
-        ],
-        tasks: [ 'jshint:src', 'concat:dist', 'ngmin' ]
-      },
+	/**
+	 * When our source files change, we want to run most of our build tasks
+	 * (excepting uglification).
+	 */
+	src: {
+	  files: [ 
+	    '<%= src.jsApp %>',
+	    '<%= src.jsLibs %>'
+	  ],
+	  tasks: [ 'jshint:src', 'concat:dist', 'ngmin' ]
+	},
 
-      /**
-       * When assets are changed, copy them. Note that this will *not* copy new
-       * files, so this is probably not very useful.
-       */
-      assets: {
-        files: [ 
-          '<%= srcdir %>/assets/**/*'
-        ],
-        tasks: [ 'copy' ]
-      },
+	/**
+	 * When assets are changed, copy them. Note that this will *not* copy new
+	 * files, so this is probably not very useful.
+	 */
+	assets: {
+	  files: [ 
+	    '<%= srcdir %>/assets/**/*'
+	  ],
+	  tasks: [ 'copy' ]
+	},
 
-      /**
-       * When index.html changes, we need to compile just it.
-       */
-      html: {
-        files: [ '<%= src.html %>' ],
-        tasks: [ 'index' ]
-      },
+	/**
+	 * When index.html changes, we need to compile just it.
+	 */
+	html: {
+	  files: [ '<%= src.html %>' ],
+	  tasks: [ 'index' ]
+	},
 
-      /**
-       * When our templates change, we only add them to the template cache.
-       */
-      tpls: {
-        files: [ 
-          '<%= src.atpl %>', 
-          '<%= src.ctpl %>'
-        ],
-        tasks: [ 'html2js', 'concat:dist', 'uglify:dist' ]
-      },
+	/**
+	 * When our templates change, we only add them to the template cache.
+	 */
+	tpls: {
+	  files: [ 
+	    '<%= src.atpl %>', 
+	    '<%= src.ctpl %>'
+	  ],
+	  tasks: [ 'html2js', 'concat:dist', 'uglify:dist' ]
+	},
 
-      /**
-       * When the CSS files change, we need to compile and minify just them.
-       */
-      less: {
-        files: [ '<%= srcdir %>/**/*.less' ],
-        tasks: [ 'recess' ]
-      },
+	/**
+	 * When the CSS files change, we need to compile and minify just them.
+	 */
+	less: {
+	  files: [ '<%= srcdir %>/**/*.less' ],
+	  tasks: [ 'recess' ]
+	},
 
-      /**
-       * When a unit test file changes, we only want to linit it and run the
-       * unit tests. However, since the `app` module requires the compiled 
-       * templates, we must also run the `html2js` task.
-       */
-      unittest: {
-        files: [
-          '<%= src.unit %>'
-        ],
-        tasks: [ 'jshint:test', 'test:unit' ]
-      }
+	/**
+	 * When a unit test file changes, we only want to linit it and run the
+	 * unit tests. However, since the `app` module requires the compiled 
+	 * templates, we must also run the `html2js` task.
+	 */
+	unittest: {
+	  files: [
+	    '<%= src.unit %>'
+	  ],
+	  tasks: [ 'jshint:test', 'test:unit' ]
+	}
     },
 
 	/**
@@ -374,6 +385,19 @@ module.exports = function ( grunt ) {
 		files: {
 			src: [ '<%= distdir %>/assets/<%= pkg.name %>.js'],
 			dest: [ '<%= distdir %>/assets/<%= pkg.name %>.js']
+		}
+	},
+
+
+	rsync: {
+		deploy: {
+			files: 'dist/',
+			options: {
+				host	    : "proxy",
+				port	    : "22",
+				user	    : "dunsun",
+				remoteBase: "~/production"
+			}
 		}
 	}
 
@@ -409,5 +433,8 @@ module.exports = function ( grunt ) {
   grunt.registerTask( 'index', 'Process index.html template', function () {
     grunt.file.copy(grunt.config.get('srcdir') + '/index.html', 'dist/index.html', { process: grunt.template.process });
   });
+
+
+  grunt.registerTask( 'deploy', ['clean', 'html2js', 'jshint', 'concat', 'uglify', 'recess', 'index', 'copy', 'rsync'] );
 
 };

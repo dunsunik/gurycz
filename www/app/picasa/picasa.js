@@ -2,6 +2,101 @@ angular.module('gury.picasa', ['gury.base'])
 
 // http://jsfiddle.net/pmKpG/19/
 
+.directive('maximizeSize', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
+return {
+      restrict: 'A',
+      link: function(scope, elm, attrs) {
+		var photoData = scope.$eval(attrs.maximizeSize);
+		var enabled = scope.$eval(attrs.maximizeSizeEnabled);
+
+		scope.$watch(attrs.maximizeSizeEnabled, function(newVal) {
+			enabled = newVal;
+			handle();
+		});
+
+		scope.$watch(attrs.maximizeSize, function(newVal) {
+			photoData = newVal;
+			handle();
+		});
+
+		var handle = function() {
+			if(enabled && photoData && photoData.width && photoData.height) {
+				var w = photoData.width;
+				var h = photoData.height;
+				console.log('zasag');
+				console.log($(window).width());
+				console.log($(window).height());
+
+				$('.modal').width(90);
+
+				$(elm).parent().width(90);
+
+				$(elm).css("width", '200px');
+				$(elm).css("height", h);
+
+				if(angular.isDefined(attrs.windowResized)) {
+					scope.$apply(function() {
+						try {
+							scope.$eval(attrs.windowResized);
+						}
+						catch(e) {
+						}
+					});
+				}
+			}
+		};
+
+		handle();
+
+		$(window).resize(function(e) {
+			handle();
+		});
+
+		scope.$on('destroy', function() {
+			$(window).off('resize', handle);
+		});
+	}
+};
+}])
+
+.directive('windowResized', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
+return {
+      restrict: 'A',
+      link: function(scope, elm, attrs) {
+		var enabled = scope.$eval(attrs.windowResizedEnabled);
+
+		scope.$watch(attrs.windowResizedEnabled, function(newVal) {
+			enabled = newVal;
+		});
+
+		var handle = function(e) {
+			if(enabled) {
+				console.log($(window).width());
+				console.log($(window).height());
+
+				if(angular.isDefined(attrs.windowResized)) {
+					scope.$apply(function() {
+						try {
+							scope.$eval(attrs.windowResized);
+						}
+						catch(e) {
+						}
+					});
+				}
+			}
+		};
+
+		$(window).resize(function(e) {
+			handle(e);
+		});
+
+		scope.$on('destroy', function() {
+			$(window).off('resize', handle);
+		});
+	}
+};
+}])
+
 .directive('globalKeydown', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
 return {
       restrict: 'A',
@@ -123,7 +218,7 @@ return {
 		'max-results': 30,
 		// set overrideLayout to true if you want to handle the images and markup directly.
 		overrideLayout: false,
-		user: 'dun',
+		user: 'dunsun',
 		hide_albums: ['Profile Photos', 'scrapBook', 'instantUpload', 'Photos from posts']
 	};	
 

@@ -1,6 +1,7 @@
 angular.module( 'gury', [
 	'ui.bootstrap',
 	'ui.directives',
+	'ahTouch',
 	'app-templates',
 	'component-templates',
 	'gury.base',
@@ -18,7 +19,7 @@ config( function myAppConfig ( $routeProvider ) {
 
 run([ 'titleService', '$rootScope', 'picasaService', 'Working', function run ( titleService, $rootScope, picasaService, Working ) {
 	// set default picasa opts
-	picasaService.setOpts({user: 'dunsun'});
+	picasaService.setOpts({user: 'dunsun', imagesize: 1600 });
 
 	titleService.setSuffix( ' | gury' );
 
