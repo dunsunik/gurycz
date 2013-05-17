@@ -12,7 +12,7 @@ module.exports = function ( grunt ) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-ngmin');
-  grunt.loadNpmTasks('grunt-rsync-2');
+  grunt.loadNpmTasks('grunt-rsync');
 
   /**
    * The `build` directory contains our custom Grunt tasks for using testacular
@@ -391,13 +391,11 @@ module.exports = function ( grunt ) {
 
 	rsync: {
 		deploy: {
-			files: 'dist/',
-			options: {
-				host	    : "proxy",
-				port	    : "22",
-				user	    : "dunsun",
-				remoteBase: "~/production"
-			}
+			src: 'dist/',
+			dest: '/home/dunsun/public_html',
+			host: 'proxy',
+			recursive: true,
+			syncDest: true
 		}
 	}
 

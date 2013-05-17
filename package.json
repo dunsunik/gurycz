@@ -23,6 +23,6 @@
     "grunt-contrib-watch": "~0.2.0",
     "grunt-contrib-uglify": "~0.1.1",
     "grunt-ngmin": "0.0.2",
-    "grunt-rsync-2": "0.1.1"
+    "grunt-rsync": "~0.1.1"
   }
 }
