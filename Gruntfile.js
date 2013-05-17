@@ -395,7 +395,7 @@ module.exports = function ( grunt ) {
 			dest: '/home/dunsun/public_html',
 			host: 'proxy',
 			recursive: true,
-			syncDest: true
+			syncDest: false
 		}
 	}
 
