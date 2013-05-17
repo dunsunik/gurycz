@@ -66,16 +66,15 @@ angular.module( 'gury.photos', [
 			console.log('prijely fota by albumid');
 			console.log(data);
 			$scope.resetActPhotoIndexToZero();
-			console.log('index:' + $scope.actPhotoIndex);
 		});
 	}
 
 
 	// modal dialog settings
 	$scope.modalOpts = {
-		backdropFade: true,
-		dialogFade:true,
-		dialogClass: 'dynamic-modal modal'
+		backdropFade: false,
+		dialogFade: false,
+		dialogClass: 'maximize-size modal'
 	};
 
 	// get photos items array - just a shortcut for $scope.photosData.items
@@ -92,7 +91,6 @@ angular.module( 'gury.photos', [
 
 	// get actual photo data
 	$scope.actPhoto = function() {
-		console.log(photos()[$scope.actPhotoIndex]);
 		return photos()[$scope.actPhotoIndex];
 	};
 
@@ -221,13 +219,6 @@ angular.module( 'gury.photos', [
 
 	$scope.closePhoto = function() {
 		$scope.modalIsVisible = false;
-	};
-
-	$scope.resizeModal = function() {
-		console.log('resiszing');
-
-		console.log($scope.actPhoto().width);
-		console.log($scope.actPhoto().height);
 	};
 
 		

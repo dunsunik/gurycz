@@ -13,10 +13,8 @@
 
 	<a href="/#/home">ZPET NA ALBA</a>
 
-	<div id="dialog">
-	<div modal="modalIsVisible" close="closePhoto()" options="modalOpts" maximize-size="actPhoto()" maximize-size-enabled="modalIsVisible">
+	<div modal="modalIsVisible" close="closePhoto()" options="modalOpts"  maximize-size-enabled="modalIsVisible">
 		<div>
-			{{actPhoto().width}}
 			<img ng-src="{{actPhoto().media.image.url}}" width="{{actPhoto().width}}" width="{{actPhoto().height}}" ah-swipeleft="prevPhoto()" ah-swiperight="nextPhoto()" />
 		</div>
 
@@ -26,7 +24,6 @@
 			<button class="btn btn-warning cancel" ng-click="nextPhoto()">Next</button>
 			<button class="btn btn-warning cancel" ng-click="closePhoto()">X</button>
 		</div>
-	</div>
 	</div>
 
 	<section id="photos">

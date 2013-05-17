@@ -4,53 +4,80 @@ angular.module('gury.picasa', ['gury.base'])
 
 .directive('maximizeSize', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
 return {
-      restrict: 'A',
-      link: function(scope, elm, attrs) {
-		var photoData = scope.$eval(attrs.maximizeSize);
-		var enabled = scope.$eval(attrs.maximizeSizeEnabled);
-
-		scope.$watch(attrs.maximizeSizeEnabled, function(newVal) {
-			enabled = newVal;
-			handle();
-		});
-
-		scope.$watch(attrs.maximizeSize, function(newVal) {
-			photoData = newVal;
-			handle();
-		});
+	restrict: 'AC',
+	link: function(scope, elm, attrs) {
+		var photoData = scope.actPhoto();
+		var enabled = scope.modalIsVisible;
 
 		var handle = function() {
 			if(enabled && photoData && photoData.width && photoData.height) {
-				var w = photoData.width;
-				var h = photoData.height;
-				console.log('zasag');
-				console.log($(window).width());
-				console.log($(window).height());
+				var imgW = photoData.width;
+				var imgH = photoData.height;
+				var imgScale = imgW / imgH;
 
-				$('.modal').width(90);
+				var docW = $(window).width();
+				var docH = ($(window).height()-70) > 0 ? ($(window).height()-70) : 0;
+				var docScale = docW / docH;				
 
-				$(elm).parent().width(90);
+				var imgScale = imgW / imgH;
+				var docScale = docW / docH;
 
-				$(elm).css("width", '200px');
-				$(elm).css("height", h);
-
-				if(angular.isDefined(attrs.windowResized)) {
-					scope.$apply(function() {
-						try {
-							scope.$eval(attrs.windowResized);
-						}
-						catch(e) {
-						}
-					});
+				// documment is wider then img
+				if(docScale < imgScale) {
+					// img's width is higher then document's width so scale it down
+					if(docW <= imgW) {
+						var scale = docW / imgW;
+						imgW = scale * imgW;
+						imgH = scale * imgH;
+					}
+					else {
+						imgW = imgW;
+						imgH = imgH;
+					}
 				}
+				else {
+					// img's width is higher then document's width so scale it down
+					if(docH <= imgH) {
+						var scale = docH / imgH;
+						//scale = 1;
+						imgW = scale * imgW;
+						imgH = scale * imgH;
+					}
+					else {
+						imgW = imgW;
+						imgH = imgH;
+					}
+				}
+
+				$(elm).css('position', 'absolute');
+				$(elm).css('margin-left', '0');
+
+				$(elm).width(Math.floor(imgW));
+				$(elm).height(Math.floor(imgH));
+
+				// center a photo
+				$(elm).css('left', Math.floor((docW - imgW) / 2));
+				$(elm).css('top', (Math.floor((docH - imgH) / 2) + 5));
 			}
 		};
 
 		handle();
 
-		$(window).resize(function(e) {
+		var unregister1 = scope.$watch('modalIsVisible', function(newVal) {
+			enabled = newVal;
+			unregister2();
+			unregister1();
 			handle();
 		});
+
+		var unregister2 = scope.$watch('actPhoto()', function(newVal) {
+			photoData = newVal;
+			handle();
+		});
+
+		$(window).off('resize', handle);
+
+		$(window).on('resize', handle);
 
 		scope.$on('destroy', function() {
 			$(window).off('resize', handle);
@@ -61,8 +88,8 @@ return {
 
 .directive('windowResized', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
 return {
-      restrict: 'A',
-      link: function(scope, elm, attrs) {
+	restrict: 'A',
+	link: function(scope, elm, attrs) {
 		var enabled = scope.$eval(attrs.windowResizedEnabled);
 
 		scope.$watch(attrs.windowResizedEnabled, function(newVal) {
@@ -71,9 +98,6 @@ return {
 
 		var handle = function(e) {
 			if(enabled) {
-				console.log($(window).width());
-				console.log($(window).height());
-
 				if(angular.isDefined(attrs.windowResized)) {
 					scope.$apply(function() {
 						try {
@@ -99,16 +123,18 @@ return {
 
 .directive('globalKeydown', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
 return {
-      restrict: 'A',
-      link: function(scope, elm, attrs) {
+	restrict: 'A',
+	link: function(scope, elm, attrs) {
 		var keysEvents = scope.$eval(attrs.globalKeydown);
 		var enabled = scope.$eval(attrs.globalKeydownEnabled);
 
 		scope.$watch(attrs.globalKeydownEnabled, function(newVal) {
+console.log('ano')
 			enabled = newVal;
 		});
 
 		$(document).keydown(function(e) {
+console.log('jede');
 			if(enabled) {
 				var action = keysEvents[e.which];
 				if(action) {
@@ -129,8 +155,8 @@ return {
 // inifiniteScroll
 .directive('infScroll', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
 return {
-      restrict: 'A',
-      link: function(scope, elm, attrs) {
+	restrict: 'A',
+	link: function(scope, elm, attrs) {
 
 		var isDisabled = scope.$eval(attrs.infScrollIsDisabled);
 		var fn = attrs.infScroll;
@@ -143,7 +169,7 @@ return {
 			var elemTop = $(el).offset().top;
 			var elemBottom = elemTop + $(el).height();
 
-			return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom) && (elemBottom <= docViewBottom) &&  (elemTop >= docViewTop) );
+			return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom) && (elemBottom <= docViewBottom) &&	(elemTop >= docViewTop) );
 		};
 
 		var handler = function() {
@@ -183,8 +209,8 @@ return {
 // directive
 .directive('picasaPhoto', ['picasaService', '$compile', function(picasaService, $compile) {
     return {
-      restrict: 'E',
-      replace: true,
+	restrict: 'E',
+	replace: true,
 	scope: {
 		index: '=',		
 		data: '=',
@@ -193,12 +219,10 @@ return {
 	templateUrl: function(elm, attrs) {
 		return attrs.include;
 	},
-      link: function(scope, elm, attrs) {
+	link: function(scope, elm, attrs) {
 		scope.showPhotoBasic = function(data) {
-			console.log('super');
-			console.log(data);
 		};
-      }
+	}
     };
 }])
 
