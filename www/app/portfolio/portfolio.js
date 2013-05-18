@@ -34,6 +34,19 @@ angular.module( 'gury.portfolio', [
 .controller( 'PortfolioCtg', [ '$scope', '$rootScope', 'titleService', 'picasaService', 'cache', function HpController( $scope, $rootScope, titleService, picasaService, cache ) {
 	titleService.setTitle( 'Home' );
 
+	// enquire - media queries - replace images
+	enquire.register("(max-width: 767px)", {
+		match : function() {
+			var img = $('.portfolio-ctgs .big-ctg a img');
+			img.attr('src', img.attr('data-src-mobile'));
+		},
+		unmatch : function() {
+			var img = $('.portfolio-ctgs .big-ctg a img');
+			img.attr('src', img.attr('data-src-desktop'));
+		},
+		deferSetup : true		  // OPTIONAL, defaults to false If set to true, defers execution the setup function until the media query is first matched. still triggered just once
+	});
+
 	$(window.document).off( "scroll");
 
 	var promise;

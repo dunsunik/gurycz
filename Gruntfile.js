@@ -90,7 +90,8 @@ src: {
 			'<%= componentsdir %>/hammerjs/dist/jquery.hammer.min.js',
 			'<%= componentsdir %>/angular-hammerjs/angular-hammer.js',
 			'<%= componentsdir %>/json3/lib/json3.min.js',
-			'<%= componentsdir %>/vegas/jquery.vegas.js'
+			'<%= componentsdir %>/vegas/jquery.vegas.js',
+			'<%= componentsdir %>/enquire/dist/enquire.min.js'
 			], 
 	jsApp:	[ '<%= srcdir %>/**/*.js', '!<%= srcdir %>/**/*.spec.js', '!<%= componentsdir %>/**/*' ], 
 	atpl:		[ '<%= srcdir %>/app/**/*.tpl.html' ],
