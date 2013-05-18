@@ -44,7 +44,7 @@ angular.module( 'gury.portfolio', [
 			var img = $('.portfolio-ctgs .big-ctg a img');
 			img.attr('src', img.attr('data-src-desktop'));
 		},
-		deferSetup : true		  // OPTIONAL, defaults to false If set to true, defers execution the setup function until the media query is first matched. still triggered just once
+		deferSetup : true	// OPTIONAL, defaults to false If set to true, defers execution the setup function until the media query is first matched. still triggered just once
 	});
 
 	$(window.document).off( "scroll");
