@@ -30,7 +30,7 @@ angular.module( 'gury.albums', [
 	var albums = cache.get('albums');
 
 	if(!albums) {
-		var promise = picasaService.getAlbums({'max-results': 4}).then(function(data) {
+		var promise = picasaService.getAlbums({'max-results': 7}).then(function(data) {
 			cache.put('albums', data);
 			albumsDataReady(data);
 		});

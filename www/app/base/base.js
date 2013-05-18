@@ -3,9 +3,9 @@ angular.module('gury.base', [])
 // centerVertically
 
 .directive( 'centerVertically', [ '$location', '$timeout', function( $location, $timeout ) {
-  return {
-    link: function( scope, elm, attrs ) {
-	var offset = angular.isDefined(attrs.offsetTop) ? parseInt(attrs.offsetTop) + 0 : 0;
+return {
+link: function( scope, elm, attrs ) {
+	var offset = angular.isDefined(attrs.offsetTop) ? parseInt(attrs.offsetTop, 10) + 0 : 0;
 
 	var handler = function() {
 		$(elm).css({
@@ -27,59 +27,59 @@ angular.module('gury.base', [])
 		$(elm).css('visibility', 'visible');
 		handler();
 	}, 500);
-    }
-  };
+}
+};
 }])
 
 
 // activeIfCurrent
 .directive( 'activeIfCurrent', [ '$location', function( $location ) {
-  return {
-    scope: true,
-    link: function( scope, element, attrs ) {
+return {
+scope: true,
+link: function( scope, element, attrs ) {
 	var check = function check () {
-	  var el = element.find( 'a' );
-	  var path = $location.path();
-	  var href = el.attr( 'href' );
-	  if ( path === href || '#' + path === href ) {
-	    element.addClass( 'active' );
-	  } else {
-	    element.removeClass( 'active' );
-	  }
+	var el = element.find( 'a' );
+	var path = $location.path();
+	var href = el.attr( 'href' );
+	if ( path === href || '#' + path === href ) {
+	element.addClass( 'active' );
+	} else {
+	element.removeClass( 'active' );
+	}
 	};
 
 	scope.$on( '$routeChangeSuccess', check );
 	scope.$on( '$locationChangeSuccess', check );
-    }
-  };
+}
+};
 }])
 
 // service
 .factory('titleService', ['$document', function($document) {
-  var suffix, title;
-  
-  var titleService = {
-    setSuffix: function setSuffix ( s ) {
+var suffix, title;
+
+var titleService = {
+setSuffix: function setSuffix ( s ) {
 	suffix = s;
-    },
-    getSuffix: function getSuffix () {
+},
+getSuffix: function getSuffix () {
 	return suffix;
-    },
-    setTitle: function setTitle ( t ) {
+},
+setTitle: function setTitle ( t ) {
 	if ( angular.isDefined( suffix ) ) {
-	  title = t + suffix;
+	title = t + suffix;
 	} else {
-	  title = t;
+	title = t;
 	}
 
 	$document.prop( 'title', title );
-    },
-    getTitle: function getTitle () {
+},
+getTitle: function getTitle () {
 	return $document.prop( 'title' );
-    }
-  };
+}
+};
 
-  return titleService;
+return titleService;
 }]).
 
 // Validation

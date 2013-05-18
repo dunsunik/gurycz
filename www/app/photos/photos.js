@@ -106,6 +106,7 @@ angular.module( 'gury.photos', [
 		// has more photos -> go to next photo
 		else if($scope.hasMorePhotos()) {
 			$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
+
 		}
 		return $scope.actPhoto();
 	};

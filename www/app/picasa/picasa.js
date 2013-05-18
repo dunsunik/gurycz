@@ -19,14 +19,13 @@ return {
 				var docH = ($(window).height()-70) > 0 ? ($(window).height()-70) : 0;
 				var docScale = docW / docH;				
 
-				var imgScale = imgW / imgH;
-				var docScale = docW / docH;
+				var scale = 1;
 
 				// documment is wider then img
 				if(docScale < imgScale) {
 					// img's width is higher then document's width so scale it down
 					if(docW <= imgW) {
-						var scale = docW / imgW;
+						scale = docW / imgW;
 						imgW = scale * imgW;
 						imgH = scale * imgH;
 					}
@@ -38,7 +37,7 @@ return {
 				else {
 					// img's width is higher then document's width so scale it down
 					if(docH <= imgH) {
-						var scale = docH / imgH;
+						scale = docH / imgH;
 						//scale = 1;
 						imgW = scale * imgW;
 						imgH = scale * imgH;
@@ -49,7 +48,7 @@ return {
 					}
 				}
 
-				$(elm).css('position', 'absolute');
+				$(elm).css('position', 'fixed');
 				$(elm).css('margin-left', '0');
 
 				$(elm).width(Math.floor(imgW));
@@ -57,7 +56,7 @@ return {
 
 				// center a photo
 				$(elm).css('left', Math.floor((docW - imgW) / 2));
-				$(elm).css('top', (Math.floor((docH - imgH) / 2) + 5));
+				$(elm).css('top', (Math.floor((docH - imgH) / 2) + 5 ));
 			}
 		};
 
@@ -65,8 +64,11 @@ return {
 
 		var unregister1 = scope.$watch('modalIsVisible', function(newVal) {
 			enabled = newVal;
-			unregister2();
-			unregister1();
+
+			if(!newVal) {
+				unregister2();
+				unregister1();
+			}
 			handle();
 		});
 
@@ -129,12 +131,10 @@ return {
 		var enabled = scope.$eval(attrs.globalKeydownEnabled);
 
 		scope.$watch(attrs.globalKeydownEnabled, function(newVal) {
-console.log('ano')
 			enabled = newVal;
 		});
 
 		$(document).keydown(function(e) {
-console.log('jede');
 			if(enabled) {
 				var action = keysEvents[e.which];
 				if(action) {
@@ -422,6 +422,17 @@ return {
 
 // input = data  (hash responded from a google which byt the way contains array of items (photos))
 // type = 'photo', 'album'
+.filter('shortenFilter', ['$filter', function($filter) {
+	return function(input, maxChars) {
+		if(input && input.length > maxChars) {
+			input = input.slice(0, maxChars) + '...';
+		}
+		return input;
+	};
+}])
+
+// input = data  (hash responded from a google which byt the way contains array of items (photos))
+// type = 'photo', 'album'
 .filter('picasaItemsFilter', ['$filter', function($filter) {
 	return function(input, type) {
 		if(input && input.items) {
@@ -457,6 +468,17 @@ return {
 		input.image = {
 			src: ''
 		};
+
+		if(type == "album") {
+			try {
+				var date = new Date(Date.parse(input.published));
+				date = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+				input.dateFormated = date;
+			}
+			catch(e) {
+				input.dateFormated = "";
+			}
+		}
 
 		return input;
 	};

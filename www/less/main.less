@@ -8,7 +8,7 @@
  * First, we include the Twitter Bootstrap LESS files. Only the ones used in the
  * project should be imported as the rest are just wasting space.
  */
-
+/*
 @import '../../vendor/twitter-bootstrap/less/mixins.less';
 @import '../../vendor/twitter-bootstrap/less/reset.less';
 @import '../../vendor/twitter-bootstrap/less/utilities.less';
@@ -24,7 +24,10 @@
 @import '../../vendor/twitter-bootstrap/less/dropdowns.less';
 @import '../../vendor/twitter-bootstrap/less/responsive.less';
 @import '../../vendor/twitter-bootstrap/less/modals.less';
+*/
 
+@import '../../vendor/twitter-bootstrap/less/bootstrap.less';
+@import '../../vendor/twitter-bootstrap/less/responsive.less';
 
 /**
  * And now any configurations for our custom fonts.
@@ -520,16 +523,23 @@ h2 {
 	padding-left: 30px;
 }
 
+/* hack since bootstrap thumbnail's spanX are broken */
+.thumbnails-list .span3:nth-child(4n+1) {
+	margin-left: 0 !important;
+}
 
-/*
-Comes from thumbnails gallery project
-*/
+/* hack since bootstrap thumbnail's spanX are broken */
+.thumbnails-list .span4:nth-child(3n+1) {
+	margin-left: 0 !important;
+}
+
 .thumbnail {
 	-webkit-border-radius: 0px;
 	-moz-border-radius: 0px;
 	border-radius: 0px;
 	border: 1px solid #444;
 	padding: 3px;
+	text-align: center;
 
 	img {
 		opacity:.85;
@@ -539,12 +549,6 @@ Comes from thumbnails gallery project
 		}
 	}
 }
-/* End of gallery project */
-
-
-
-
-
 
 
 /**
@@ -844,6 +848,7 @@ Comes from thumbnails gallery project
     }
 
 }
+
 
 
 /**

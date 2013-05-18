@@ -52,7 +52,9 @@ run([ 'titleService', '$rootScope', 'picasaService', 'Working', function run ( t
 
 // controller
 controller( 'AppCtrl', [ '$scope', '$location', function AppCtrl ( $scope, $location ) {
-
+	$scope.goBack = function() {
+		window.history.back();
+	};
 }]);
 
 // just start the whole angular thing after the document loading is ready
