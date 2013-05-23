@@ -472,8 +472,9 @@ return {
 		if(type == "album") {
 			try {
 				var date = new Date(Date.parse(input.published));
-				date = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
-				input.dateFormated = date;
+
+				input.dateYear = date.getFullYear();
+				input.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
 			}
 			catch(e) {
 				input.dateFormated = "";

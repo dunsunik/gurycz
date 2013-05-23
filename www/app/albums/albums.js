@@ -17,13 +17,45 @@ angular.module( 'gury.albums', [
 /**
  * And of course we define a controller for our route.
  */
-.controller( 'AlbumsCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'cache', '$rootScope', function PhotosController( $scope, titleService, picasaService, $routeParams, cache, $rootScope ) {
+.controller( 'AlbumsCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'cache', '$rootScope', '$filter', function PhotosController( $scope, titleService, picasaService, $routeParams, cache, $rootScope, $filter ) {
 	titleService.setTitle( 'Albumy' );
 
 	$(window.document).off( "scroll");
 
 	var albumsDataReady = function(data) {
-		$rootScope.albums = data;
+		var years = [];
+
+		var prevYear = undefined;
+		var items = [];
+
+		var breakYearRow = function(years, items, prevYear) {
+			years.push({
+				year: prevYear,
+				items: items
+			});
+		};
+
+		angular.forEach(data.items, function(item) {
+			item = $filter('picasaItemFilter')(item, 'album');
+
+			// first item
+			if(prevYear === undefined) {
+				prevYear = item.dateYear;
+			}
+
+			// is new year -> so break row
+			if(prevYear != item.dateYear) {
+				breakYearRow(years, items, prevYear);
+				items = [];
+				prevYear = item.dateYear;
+			}
+
+			items.push(item);
+		});
+
+		breakYearRow(years, items, prevYear);
+
+		$rootScope.years = years;
 	};
 
 	// get all albums and put them into a cache

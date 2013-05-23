@@ -1,9 +1,8 @@
 <script type="text/ng-template" id="photo-block.html"> 
-	<div class="thumbnail">
-		<a  ng-click="showPhotoBridge({index: index})">
-			<img ng-src="{{data.thumb.src}}" alt="" />
-			<h3>{{data.title}}</h3>
-			<p>{{data.description}}</p>
+	<div class="pull-center shadow">
+		<a ng-click="showPhotoBridge({index: index})">
+			<img class="" ng-src="{{data.thumb.src}}" alt="" />
+			<h2>{{data.description}}</h2>
 		</a>
 	</div>
 </script>
@@ -23,13 +22,13 @@
 
 <div global-keydown="{37: 'prevPhoto()', 39: 'nextPhoto()'}" global-keydown-enabled="modalIsVisible"></div>
 
-<a href="" ng-click="goBack()">JDI ZPĚT</a>
 
 <!-- Photos -->
 <section id="photos" class="box">
 	<div class="row-fluid">
 		<div class="span12 header first-header">
 			<hgroup>
+				<a href="" ng-click="goBack()" class="goback">JDI ZPĚT</a>
 				<h2>Fotky</h2>
 				<h3>Náhledy vyfocených fotografií</h3>
 			</hgroup>
@@ -39,7 +38,7 @@
 	<div class="row-fluid">
 		<div class="span12 content">
 				<ul class="thumbnails thumbnails-list">
-					<li class="span3 row-fluid" ng-repeat="item in photosData.items">
+					<li class="span3 row-fluid thumbnail" ng-repeat="item in photosData.items">
 						<picasa-photo data="item" index="$index" include="photo-block.html" show-photo-bridge="openPhoto(index)" />
 					</li>
 				</ul>

@@ -1,6 +1,6 @@
 <script type="text/ng-template" id="photo-block.html"> 
-	<div class="thumbnail album">
-		<a ng-href="/#/photos/albumid/{{data.id}}" class="thumbnail">
+	<div class="pull-center shadow">
+		<a ng-href="/#/photos/albumid/{{data.id}}">
 			<img ng-src="{{data.thumb.src}}" alt="" />
 			<h2>{{data.title}}</h2>
 			<h3>{{data.dateFormated}}</h3>
@@ -23,11 +23,15 @@
 	<div class="row-fluid">
 		<div class="span12 content">
 			<section class="portfolio-ctgs" >
-				<ul class="thumbnails">
-					<li class="span4" ng-repeat="item in albums.items">
-						<picasa-photo data="item" include="photo-block.html"/>
-					</li>
-				</ul>
+				<div ng-repeat="year in years">
+					<h2>{{year.year}}</h2>
+				
+					<ul class="thumbnails thumbnails-list">
+						<li class="span4 row-fluid thumbnail" ng-repeat="item in year.items">
+							<picasa-photo data="item" include="photo-block.html"/>
+						</li>
+					</ul>
+				</div>
 			</section>
 		</div>
 	</div>
