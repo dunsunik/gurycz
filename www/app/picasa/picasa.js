@@ -324,7 +324,8 @@ return {
 				'albumid': params.albumid,
 				'tag': params.tag,
 				'max-results': params['max-results'],
-				'kind': 'photo'
+				'kind': 'photo',
+				'alt': params.alt
 			});
 		},
 
@@ -359,7 +360,7 @@ return {
 		var d = $q.defer();
 		$http.jsonp(url).success(function(data, status) {
 			// transform data with our filter - will exclude special picasa internal albums
-			data.data = $filter('picasaItemsFilter')(data.data, 'album');
+			data = $filter('picasaItemsFilter')(data, 'album');
 			picasaWorking(params.picasaWorking, false);
 			d.resolve(data.data);
 		}).error(function(data, status) {
@@ -377,9 +378,15 @@ return {
 		picasaWorking(params.picasaWorking, true);
 		var url = params && params.nextLink ? params.nextLink + '&callback=JSON_CALLBACK' : urls.photos(params);
 		var d = $q.defer();
+		console.log(url);
+
 		$http.jsonp(url).success(function(data, status) {
+			console.log(data);
+			console.log('po sekacovi');
+
 			// transform data with our filter
-			data.data = $filter('picasaItemsFilter')(data.data, 'photo');
+			data = $filter('picasaItemsFilter')(data, 'photo');
+
 			picasaWorking(params.picasaWorking, false);
 			d.resolve(data.data);
 		}).error(function(data, status) {
@@ -415,6 +422,28 @@ return {
 	// get opts object
 	getOpts: function() {
 		return opts;
+	},
+
+	getBlankItemStructure: function() {
+		var item = {
+			thumb: {
+				url: '',
+				alt: '',
+				w: 'auto',
+				h: 'auto'
+			},
+			image: {
+				url: '',
+				alt: '',
+				w: 'auto',
+				h: 'auto'
+			},
+			dateFormated: '',
+			dateYear: '',
+			title: '',
+			descr: ''
+		};
+		return item;
 	}
 	
     };
@@ -433,26 +462,284 @@ return {
 
 // input = data  (hash responded from a google which byt the way contains array of items (photos))
 // type = 'photo', 'album'
+// dataFormat - according to alt=jsonc or json
 .filter('picasaItemsFilter', ['$filter', function($filter) {
-	return function(input, type) {
-		if(input && input.items) {
-			var outItems = [];
-			angular.forEach(input.items, function(item) {
-				// album filter
-				if(type=="album") {
-					// do not include special picasa internal default albums
-					if(!item.type) {
+	return function(input, type, dataFormat) {
+		if(input) {
+			var filterName;
+			console.log(input);
+
+			// jsonc
+			if(input.data && input.data.items) {
+				console.log('super je to JSNC');
+
+				filterName = 'picasaItemsJsoncToJsoncFilter';
+			}
+			// rss
+			else if(typeof(input) === 'string') {
+				filterName = 'picasaItemsRssToJsoncFilter';
+			}
+			// json
+			else {
+				filterName = 'picasaItemsJsonToJsoncFilter';
+			}
+
+			input.data = $filter(filterName)(input);
+		}
+
+		return input;
+	};
+}])
+
+// transform json data format to jsonc data format
+.filter('picasaItemsJsoncToJsoncFilter', ['$filter', 'picasaService', function($filter, picasaService) {
+	return function(input) {
+		var out = {
+			origData: angular.copy(input),
+			items: [],
+			nextLink: ''
+		};
+
+		if(input) {
+			// items
+			if(input.data && input.data.items) {
+				var outItems = [];
+				angular.forEach(input.data.items, function(entry) {
+					var item = picasaService.getBlankItemStructure();
+
+					// image url, w, h, alt
+					if(entry.media.image && entry.media.image.url && entry.media.image.url.length > 0) {
+							var image = entry.media.image;
+							item.image.url = image.url && image.url.length > 0 ? image.url : '';
+							item.image.w = image.width ? image.width : 'auto';
+							item.image.h = image.height ? image.height : 'auto';
+							item.image.alt = '';
+					}
+
+					// thumbnail url, w, h, alt - if it exists
+					if(entry.media.thumbnail && entry.media.thumbnail.url && entry.media.thumbnail.url.length > 0) {
+							var thumb = entry.media.thumbnail;
+							item.thumb.url = thumb.url && thumb.url.length > 0 ? thumb.url : '';
+							item.thumb.w = thumb.width ? thumb.width : 'auto';
+							item.thumb.h = thumb.height ? thumb.height : 'auto';
+							item.thumb.alt = '';
+					}
+					// thumbnail url, w, h, alt - hack - get it from full image's url
+					else {
+						var splited = item.image.url.split('/');
+						if(splited && (splited.length - 2) >= 0) {
+							var size = splited[splited.length-2];
+							size = 's160-c';
+							splited[splited.length-2] = size;
+							item.thumb.url = splited.join('/');
+						}
+					}
+
+					// title
+					if(entry.title) {
+						item.title = entry.title;
+					}
+
+					// descr
+					if(entry.description) {
+						item.descr = entry.description;
+					}
+
+					// dateFormated, dateYear
+					try {
+						var date = new Date(Date.parse(entry.published));
+						item.dateYear = date.getFullYear();
+						item.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+					}
+					catch(e) {
+						item.dateFormated = "";
+						item.dateYear = "";
+					}
+
+					outItems.push(item);
+				});
+				out.items = outItems;
+			}
+
+			// nextLink
+			if(input.data && input.nextLink && input.data.nextLink.length >= 6) {
+				out.nextLink = input.data.nextLink;
+			}
+		}
+
+		return out;
+	};
+}])
+/*
+
+			// jsonc format
+			if(input.data.items) {
+				var outItems = [];
+				angular.forEach(input.data.items, function(item) {
+					// album filter
+					if(type=="album") {
+						// do not include special picasa internal default albums
+						if(!item.type) {
+							outItems.push($filter('picasaItemFilter')(item, type));
+						}
+					}
+					// photo filter
+					else if(type=="photo") {
 						outItems.push($filter('picasaItemFilter')(item, type));
 					}
-				}
-				// photo filter
-				else if(type=="photo") {
-					outItems.push($filter('picasaItemFilter')(item, type));
-				}
-			});
-			input.items = outItems;
+				});
+				input.data.items = outItems;
+			}
+*/
+
+// transform json data format to jsonc data format
+.filter('picasaItemsJsonToJsoncFilter', ['$filter', 'picasaService', function($filter, picasaService) {
+	return function(input) {
+		var out = {
+			items: [],
+			nextLink: ''
+		};
+console.log('ano json');
+console.log(input.feed.entry);
+
+		if(input) {
+			// items
+			if(input.feed && input.feed.entry) {
+				var outItems = [];
+				angular.forEach(input.feed.entry, function(entry) {
+					console.log('jo');
+					var item = picasaService.getBlankItemStructure();
+
+					// thumbnail url, w, h, alt
+					if(entry.media$group && entry.media$group.media$thumbnail && entry.media$group.media$thumbnail.length > 0) {
+							var thumb = entry.media$group.media$thumbnail[0];
+							item.thumb.url = thumb.url && thumb.url.length > 0 ? thumb.url : '';
+							item.thumb.w = thumb.width ? thumb.width : 'auto';
+							item.thumb.h = thumb.height ? thumb.height : 'auto';
+							item.thumb.alt = '';
+					}
+
+					// image url, w, h, alt
+					if(entry.media$group && entry.media$group.media$content && entry.media$group.media$content.length > 0) {
+							var image = entry.media$group.media$content[0];
+							item.image.url = image.url && image.url.length > 0 ? image.url : '';
+							item.image.w = image.width ? image.width : 'auto';
+							item.image.h = image.height ? image.height : 'auto';
+							item.image.alt = '';
+					}
+
+					// title
+					if(entry.summary) {
+						item.title = entry.summary.$t;
+					}
+
+					// descr
+					if(entry.title) {
+						item.descr = entry.title.$t;
+					}
+
+					// dateFormated, dateYear
+					try {
+						var date = new Date(Date.parse(entry.published.$t));
+						item.dateYear = date.getFullYear();
+						item.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+					}
+					catch(e) {
+						item.dateFormated = "";
+						item.dateYear = "";
+					}
+
+					outItems.push(item);
+				});
+				out.items = outItems;
+			}
+
+			// nextLink
+			if(input.feed && input.feed.link && input.feed.link.length >= 6) {
+				out.nextLink = input.feed.link[5].href;
+			}
+
 		}
-		return input;
+
+		return out;
+	};
+}])
+
+// transform xml rss data format to jsonc data format
+.filter('picasaItemsRssToJsoncFilter', ['$filter', 'picasaService', function($filter, picasaService) {
+	return function(input) {
+		var out = {
+			items: [],
+			nextLink: ''
+		};
+
+		if(input) {
+			var data = x2js.xml_str2json(input);
+			console.log(input);
+			console.log('jede to');
+
+			console.log(data);
+			console.log('posekano');
+
+			// items
+			if(data.channel && data.channel.item_asArray) {
+				var outItems = [];
+				angular.forEach(data.channel.item_asArray, function(entry) {
+					console.log('jo');
+					var item = picasaService.getBlankItemStructure();
+
+					// thumbnail url, w, h, alt
+					if(entry.media$group && entry.media$group.media$thumbnail && entry.media$group.media$thumbnail.length > 0) {
+							var thumb = entry.media$group.media$thumbnail[0];
+							item.thumb.url = thumb.url && thumb.url.length > 0 ? thumb.url : '';
+							item.thumb.w = thumb.width ? thumb.width : 'auto';
+							item.thumb.h = thumb.height ? thumb.height : 'auto';
+							item.thumb.alt = '';
+					}
+
+					// image url, w, h, alt
+					if(entry.media$group && entry.media$group.media$content && entry.media$group.media$content.length > 0) {
+							var image = entry.media$group.media$content[0];
+							item.image.url = image.url && image.url.length > 0 ? image.url : '';
+							item.image.w = image.width ? image.width : 'auto';
+							item.image.h = image.height ? image.height : 'auto';
+							item.image.alt = '';
+					}
+
+					// title
+					if(entry.summary) {
+						item.title = entry.summary.$t;
+					}
+
+					// descr
+					if(entry.title) {
+						item.descr = entry.title.$t;
+					}
+
+					// dateFormated, dateYear
+					try {
+						var date = new Date(Date.parse(entry.published.$t));
+						item.dateYear = date.getFullYear();
+						item.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+					}
+					catch(e) {
+						item.dateFormated = "";
+						item.dateYear = "";
+					}
+
+					outItems.push(item);
+				});
+				out.items = outItems;
+			}
+
+			// nextLink
+			if(input.feed && input.feed.link && input.feed.link.length >= 6) {
+				out.nextLink = input.feed.link[5].href;
+			}
+
+		}
+
+		return out;
 	};
 }])
 
@@ -460,13 +747,103 @@ return {
 // type = 'photo', 'album'
 .filter('picasaItemFilter', ['$http', function($http) {
 	return function(input, type) {
+		// thumb src
+		var src;
+		// for some reason when getting photos byt tag there is no thumbnails so we have to check for it
+		if(input && input.media.thumbnails && input.media.thumbnails.length > 0) {
+			src = input.media.thumbnails[0];
+		}
+		// when thumbnails miss we create thumb's url from a media.image
+		else if(input && input.media && input.media.image && input.media.image.url && input.media.image.url.length > 0) {
+			src = input.media.image.url;
+		}
+		else {
+			src = "";
+		}
 		input.thumb = {
-			src: (input.media.thumbnails && input.media.thumbnails.length > 0 ? input.media.thumbnails[0] : ''),
+			src: src,
 			alt: input.title
 		};
 
-		input.image = {
-			src: ''
+		if(type == "album") {
+			try {
+				var date = new Date(Date.parse(input.published));
+
+				input.dateYear = date.getFullYear();
+				input.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+			}
+			catch(e) {
+				input.dateFormated = "";
+			}
+		}
+
+		return input;
+	};
+}])
+
+// input = data.items.item  (photo)
+// type = 'photo', 'album'
+.filter('picasaItemsByYearsFilter', ['$http', function($http) {
+	return function(input) {
+
+		var years = [];
+
+		var prevYear = undefined;
+		var items = [];
+
+		var breakYearRow = function(years, items, prevYear) {
+			years.push({
+				year: prevYear,
+				items: items
+			});
+		};
+
+		angular.forEach(input.items, function(item) {
+			// first item
+			if(prevYear === undefined) {
+				prevYear = item.dateYear;
+			}
+
+			// is new year -> so break row
+			if(prevYear != item.dateYear) {
+				breakYearRow(years, items, prevYear);
+				items = [];
+				prevYear = item.dateYear;
+			}
+
+			items.push(item);
+		});
+
+		breakYearRow(years, items, prevYear);
+
+		console.log('years');
+		console.log(years);
+
+		return years;
+	};
+}])
+
+
+// input = data.items.item  (photo)
+// type = 'photo', 'album'
+.filter('picasaItemFilterJson', ['$http', function($http) {
+	return function(input, type) {
+		// thumb src
+		var src;
+		// for some reason when getting photos byt tag there is no thumbnails so we have to check for it
+		if(input && input.media.thumbnails && input.media.thumbnails.length > 0) {
+			src = input.media.thumbnails[0];
+		}
+		// when thumbnails miss we create thumb's url from a media.image
+		else if(input && input.media && input.media.image && input.media.image.url && input.media.image.url.length > 0) {
+			src = input.media.image.url;
+		}
+		else {
+			src = "";
+		}
+		input.thumb = {
+			src: src,
+			alt: input.title
 		};
 
 		if(type == "album") {

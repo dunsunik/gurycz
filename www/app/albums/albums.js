@@ -22,53 +22,17 @@ angular.module( 'gury.albums', [
 
 	$(window.document).off( "scroll");
 
-	var albumsDataReady = function(data) {
-		var years = [];
-
-		var prevYear = undefined;
-		var items = [];
-
-		var breakYearRow = function(years, items, prevYear) {
-			years.push({
-				year: prevYear,
-				items: items
-			});
-		};
-
-		angular.forEach(data.items, function(item) {
-			item = $filter('picasaItemFilter')(item, 'album');
-
-			// first item
-			if(prevYear === undefined) {
-				prevYear = item.dateYear;
-			}
-
-			// is new year -> so break row
-			if(prevYear != item.dateYear) {
-				breakYearRow(years, items, prevYear);
-				items = [];
-				prevYear = item.dateYear;
-			}
-
-			items.push(item);
-		});
-
-		breakYearRow(years, items, prevYear);
-
-		$rootScope.years = years;
-	};
-
 	// get all albums and put them into a cache
 	var albums = cache.get('albums');
 
 	if(!albums) {
-		var promise = picasaService.getAlbums({'max-results': 7}).then(function(data) {
+		var promise = picasaService.getAlbums({'max-results': 7, imagesize: 288}).then(function(data) {
 			cache.put('albums', data);
-			albumsDataReady(data);
+			$scope.years = $filter('picasaItemsByYearsFilter')(data);
 		});
 	}
 	else {
-		albumsDataReady(albums);
+		$scope.years = $filter('picasaItemsByYearsFilter')(albums);
 	}
 
 }]);

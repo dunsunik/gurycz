@@ -1,14 +1,3 @@
-<script type="text/ng-template" id="photo-block.html"> 
-	<div class="pull-center shadow">
-		<a ng-href="/#/photos/albumid/{{data.id}}">
-			<img ng-src="{{data.thumb.src}}" alt="" />
-			<h2>{{data.title}}</h2>
-			<h3>{{data.dateFormated}}</h3>
-			<p>{{data.description | shortenFilter:100}}</p>
-		</a>
-	</div>
-</script>
-
 <!-- Albums categories -->
 <section id="albums" class="box">
 	<div class="row-fluid">
@@ -25,12 +14,24 @@
 			<section class="portfolio-ctgs" >
 				<div ng-repeat="year in years">
 					<h2>{{year.year}}</h2>
-				
-					<ul class="thumbnails thumbnails-list">
-						<li class="span4 row-fluid thumbnail" ng-repeat="item in year.items">
-							<picasa-photo data="item" include="photo-block.html"/>
-						</li>
-					</ul>
+
+					<div class="span12 row-fluid one-album-row" ng-repeat="item in year.items">
+						<div class="span6 image">
+							<div class="pull-center thumbnail shadow">
+								<a ng-href="/#/photos/albumid/{{data.id}}">
+									<img ng-src="{{item.image.url}}" alt="" />
+								</a>
+							</div>
+						</div>
+						<div class="span6 description">
+							<a ng-href="/#/photos/albumid/{{data.id}}">
+								<h2>{{item.title}}</h2>
+								<h3>{{item.dateFormated}}</h3>
+								<p>{{item.description | shortenFilter:500}}</p>
+							</a>
+						</div>
+					</div>
+
 				</div>
 			</section>
 		</div>

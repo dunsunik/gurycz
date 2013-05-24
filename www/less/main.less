@@ -520,6 +520,60 @@ h2 {
 	}
 }
 
+/*
+horizonal offset
+vertical offset
+blur strength
+positive values increase shadow size
+*/
+.shadow {
+	-moz-box-shadow:    2px 2px 5px 0px #666;
+	-webkit-box-shadow: 2px 2px 5px 0px #666;
+	box-shadow:         2px 2px 5px 0px #666;
+}
+
+.shadow-disabled {
+	-moz-box-shadow:    none;
+	-webkit-box-shadow: none;
+	box-shadow:         none;
+}
+
+/* used in photos, albums ctgs */
+.thumbnails-list .thumbnail {
+	border: 0px solid #fff;
+	text-align: center;
+	.shadow-disabled;
+
+	div {
+		width: 160px;
+		height: 190px;
+		border: 1px solid #444;
+		border-radius: 0px;
+		background-color: #fff;
+		padding: 0px 0px 5px 0px;
+	}
+
+	h2 {
+		margin: 9px 2px 0px 2px;
+		color: #000;
+		padding: 2px;
+		font-size: 13px;
+		line-height: 13px;
+	}
+
+	img {
+		opacity:1;
+		&:hover{
+			opacity:.85;
+		}
+	}
+}
+
+.pull-center {
+	margin: 0 auto;
+	float: none;
+}
+
 
 /**
 * CSS Media Queries
