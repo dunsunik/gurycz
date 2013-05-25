@@ -40,5 +40,28 @@
 	max-height: 100% !important;
 }
 
+.exif {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	background-color: #111;
+	opacity: 0.85;
+	color: @TitleColor;
+	padding: 6px;
+
+	li > div {
+		float: none;
+		clear: both;
+		.exifKey {
+			width: 100px;
+			float: left;
+		}
+
+		.exifVal {
+			width: auto;
+			float: right;
+		}
+	}
+}
 
 

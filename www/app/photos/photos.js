@@ -210,6 +210,12 @@ angular.module( 'gury.photos', [
 
 	$scope.toggleExifInfo = function() {
 		console.log('toggle exif info');
+
+		// will become enabled -> regenerate and tidy exif data
+		if(!$scope.exifInfoEnabled) {
+			picasaService.tuneExifData($scope.actPhoto());
+		}
+
 		$scope.exifInfoEnabled = $scope.exifInfoEnabled ? false : true;
 	};
 

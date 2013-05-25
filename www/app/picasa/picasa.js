@@ -2,7 +2,7 @@ angular.module('gury.picasa', ['gury.base'])
 
 // http://jsfiddle.net/pmKpG/19/
 
-.directive('maximizeSize', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
+.directive('maximizeSize', ['Working', '$rootScope', '$timeout', 'picasaService', function(Working, $rootScope, $timeout, picasaService) {
 return {
 	restrict: 'AC',
 	link: function(scope, elm, attrs) {
@@ -75,6 +75,7 @@ return {
 		var unregister2 = scope.$watch('actPhoto()', function(newVal) {
 			photoData = newVal;
 			handle();
+			picasaService.tuneExifData(newVal);
 		});
 
 		$(window).off('resize', handle);
@@ -132,7 +133,7 @@ return {
 	link: function(scope, elm, attrs) {
 
 		scope.$watch(attrs.toggleFsMode, function(newVal) {
-			if(newVal == true) {
+			if(newVal) {
 				startFsMode(document.documentElement);
 			}
 			else {
@@ -290,6 +291,7 @@ return {
 	$http.defaults.useXDomain = true;
 
 	var picasaWorking = function(key, val) {
+		return val;
 		if(key !== undefined) {
 			// set
 			if(val !== undefined) {
@@ -487,9 +489,68 @@ return {
 			isSystemAlbum: false
 		};
 		return item;
+	},
+
+	tuneExifData: function(item) {
+		if(!item.exifTuned && item.exif) {
+			var exifArray = [];
+			var val;
+
+			val = item.exif['fstop'];
+			if(val) {
+				val = val + " f";
+				exifArray.push({ "Clona" : val });
+			}
+
+			val = item.exif['exposure'];
+			if(val) {
+				val = "1/" + (1 / item.exif['exposure']) + " s";
+				exifArray.push({ "Čas" : val });
+			}
+
+			val = item.exif['focallength'];
+			if(val) {
+				val = parseInt(val + 0) + " mm";
+				exifArray.push({ "Ohnisko" : val });
+			}
+
+			val = item.exif['iso'];
+			if(val) {
+				val = val;
+				exifArray.push({ "ISO" : val });
+			}
+			
+			val = item.exif['flash'];
+			if(val) {
+				val = val ? "ano" : "ne";
+				exifArray.push({ "Blesk" : val });
+			}
+
+			val = item.exif['make'];
+			if(val) {
+				val = val;
+				exifArray.push({ "Značka" : val });
+			}
+
+			val = item.exif['model'];
+			if(val) {
+				val = val;
+				exifArray.push({ "Model" : val });
+			}
+
+			val = item.exif['time'];
+			if(val) {
+				var date = new Date();
+				date.setTime((val + 0) / 10);
+				val = date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
+				exifArray.push({ "Datum" : val });
+			}
+
+			item.exifTuned = exifArray;
+		}
 	}
 	
-    };
+    }; // end of all public methods
 }])
 
 // input = data  (hash responded from a google which byt the way contains array of items (photos))
@@ -593,15 +654,20 @@ return {
 					}
 
 					// isSystemAlbum
-					if(entry && entry.type && entry.type.length > 0) {
+					if(entry.type && entry.type.length > 0) {
 						item.isSystemAlbum = true;
+					}
+
+					// exif
+					if(entry.exif) {
+						item.exif = entry.exif;
 					}
 
 					// dateFormated, dateYear
 					try {
 						var date = new Date(Date.parse(entry.published));
 						item.dateYear = date.getFullYear();
-						item.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+						item.dateFormated = date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear();
 					}
 					catch(e) {
 						item.dateFormated = "";
@@ -673,7 +739,7 @@ return {
 					try {
 						var date = new Date(Date.parse(entry.published.$t));
 						item.dateYear = date.getFullYear();
-						item.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+						item.dateFormated = date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear();
 					}
 					catch(e) {
 						item.dateFormated = "";
@@ -756,7 +822,7 @@ return {
 				var date = new Date(Date.parse(input.published));
 
 				input.dateYear = date.getFullYear();
-				input.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+				input.dateFormated = date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear();
 			}
 			catch(e) {
 				input.dateFormated = "";
@@ -850,7 +916,7 @@ return {
 				var date = new Date(Date.parse(input.published));
 
 				input.dateYear = date.getFullYear();
-				input.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+				input.dateFormated = date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear();
 			}
 			catch(e) {
 				input.dateFormated = "";

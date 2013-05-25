@@ -13,7 +13,14 @@
 	</div>
 
 	<div ng-show="exifInfoEnabled">
-		Exif info data
+		<ul class="exif">
+			<li ng-repeat="entry in actPhoto().exifTuned">
+				<div ng-repeat="(key, val) in entry">
+					<div class="exifKey">{{key}}</div>
+					<div class="exifVal">{{val}}</div>
+				</div>
+			</li>
+		</ul>
 	</div>
 
 	<div class="modal-footer">
@@ -25,7 +32,7 @@
 </div>
 
 <div 
-global-keydown="{8: 'prevPhoto()', 37: 'prevPhoto()', 32: 'nextPhoto()', 39: 'nextPhoto()', 13: 'toggleFsMode()', 70: 'toggleFsMode()', 73: 'toggleExifInfo()'}" global-keydown-enabled="modalIsVisible"
+global-keydown="{8: 'prevPhoto()', 37: 'prevPhoto()', 32: 'nextPhoto()', 39: 'nextPhoto()', 13: 'toggleFsMode()', 73: 'toggleExifInfo()'}" global-keydown-enabled="modalIsVisible"
 toggle-fs-mode="fsModeEnabled"
 ></div>
 
