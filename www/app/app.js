@@ -17,43 +17,49 @@ config( function myAppConfig ( $routeProvider ) {
 	$routeProvider.otherwise({ redirectTo: '/hp' });
 }).
 
-run([ 'titleService', '$rootScope', 'picasaService', 'Working', function run ( titleService, $rootScope, picasaService, Working ) {
+run([ 'titleService', '$rootScope', 'picasaService', 'Working', 'cache', '$filter', '$q', function run ( titleService, $rootScope, picasaService, Working, cache, $filter, $q ) {
 	// set default picasa opts
 	picasaService.setOpts({user: 'dunsun', imagesize: 1600 });
 
 	titleService.setSuffix( ' | gury' );
 
-	$rootScope.$watch('isWorking', function(val) {
-		console.log('loading:' + val);
-	});
-
 	$rootScope.isWorking = function() {
-		return Working.isWorking('picasaWorking') || Working.isWorking('scrollIsLoadingPhotos') ? true : false;
+		return Working.isWorking('picasaWorking') ? true : false;
 	};
 
 	$rootScope.resetAllLoadings = function() {
-		Working.unset('picasaLoading');
-		Working.unset('scrollIsLoadingPhotos');
+		Working.unset('picasaWorking');
 	};
 
-
 	$rootScope.showWorking = function() {
-		Working.set('loading-global');
+		Working.set('picasaWorking');
 	};
 
 	$rootScope.hideWorking = function() {
-		Working.unset('loading-global');
+		Working.unset('picasaWorking');
 	};
 
-	$rootScope.scrollTop = function() {
-		$('html, body').animate({ scrollTop: 0 }, 500, function(){ });
-	};
+	$rootScope.albumOpts = {'max-results': 30, imagesize: 288};
 }]).
 
 // controller
-controller( 'AppCtrl', [ '$scope', '$location', function AppCtrl ( $scope, $location ) {
+controller( 'AppCtrl', [ '$scope', '$location', 'Working', '$rootScope', function AppCtrl ( $scope, $location, Working, $rootScope ) {
 	$scope.goBack = function() {
 		window.history.back();
+	};
+
+	$scope.scrollTop = function() {
+		$('html, body').animate({ scrollTop: 0 }, 500, function(){ });
+	};
+
+	// good for a testing only
+	$scope.toggleSpinner = function() {
+		if($rootScope.isWorking()) {
+			Working.unset('picasaWorking');
+		}
+		else {
+			Working.set('picasaWorking');
+		}
 	};
 }]);
 

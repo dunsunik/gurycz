@@ -2,6 +2,68 @@ angular.module('gury.picasa', ['gury.base'])
 
 // http://jsfiddle.net/pmKpG/19/
 
+
+.directive('spinner', ['Working', '$rootScope', '$timeout', 'picasaService', function(Working, $rootScope, $timeout, picasaService) {
+return {
+	restrict: 'A',
+	scope: {
+		spinner: '='		
+	},
+	link: function(scope, elm, attrs) {
+		var enabled = scope.spinner;
+
+		var opts = {
+			lines: 13, // The number of lines to draw
+			length: 20, // The length of each line
+			width: 10, // The line thickness
+			radius: 30, // The radius of the inner circle
+			corners: 1, // Corner roundness (0..1)
+			rotate: 0, // The rotation offset
+			direction: 1, // 1: clockwise, -1: counterclockwise
+			color: '#FFFF00', // #rgb or #rrggbb
+			speed: 1, // Rounds per second
+			trail: 60, // Afterglow percentage
+			shadow: false, // Whether to render a shadow
+			hwaccel: false, // Whether to use hardware acceleration
+			className: 'spinner', // The CSS class to assign to the spinner
+			zIndex: 2e9, // The z-index (defaults to 2000000000)
+			top: 'auto', // Top position relative to parent in px
+			left: 'auto' // Left position relative to parent in px
+		};
+
+		var spinner = new Spinner(opts);
+
+		// should be a body element 
+		var target = $('body')[0];
+
+		var handle = function(enabled) {
+			if(enabled) {
+				$(elm).addClass('spinner-is-enabled');
+				spinner.spin(target);
+			}
+			else {
+				$(elm).removeClass('spinner-is-enabled');
+				spinner.stop();
+			}
+		};
+
+		var unregister2 = scope.$watch('spinner', function(newVal) {
+			handle(newVal);
+			
+			
+
+		});
+
+		var unregister1 = scope.$watch('modalIsVisible', function(newVal) {
+		});
+
+		scope.$on('destroy', function() {
+			// $(window).off('resize', handle);
+		});
+	}
+};
+}])
+
 .directive('maximizeSize', ['Working', '$rootScope', '$timeout', 'picasaService', function(Working, $rootScope, $timeout, picasaService) {
 return {
 	restrict: 'AC',
@@ -9,10 +71,35 @@ return {
 		var photoData = scope.actPhoto();
 		var enabled = scope.modalIsVisible;
 
+		console.log(elm);
+
+		console.log('w:' + elm.find('img').width());
+		console.log('h:' + elm.find('img').height());
+
+		var isIE78 = function() {																				 
+			return jQuery.support.leadingWhitespace == false ? true : false;
+		};
+		
+		// just a proxy to img.load() method since IE7 or IE8 does not fire on load finish callback when images are cached in a browser
+		var loadImageAsyncProxy = function(imgEl, src, cb) {
+			if(imgEl) { 
+				src = src ? src : ''; 
+				src = isIE78() ? (src + "?" + new Date().getTime()) : src;
+				
+				// caching can break load event calling (load is not called if image is already cached)
+				// better solution - https://github.com/desandro/imagesloaded
+				imgEl.attr('src', src).load(cb);
+			}
+		};
+
 		var handle = function() {
-			if(enabled && photoData && photoData.width && photoData.height) {
-				var imgW = photoData.width;
-				var imgH = photoData.height;
+			console.log(enabled);
+			console.log(photoData);
+			if(enabled && photoData && photoData.image && photoData.image.w && photoData.image.h) {
+				var imgW = photoData.image.w;
+				var imgH = photoData.image.h;
+
+				console.log(photoData);
 				var imgScale = imgW / imgH;
 
 				var docW = $(window).width();
@@ -269,7 +356,7 @@ return {
 }])
 
 // service
-.factory('picasaService', ['$http', '$q', 'Working', '$filter', '$rootScope', function($http, $q, Working, $filter, $rootScope) {
+.factory('picasaService', ['$http', '$q', 'Working', '$filter', '$rootScope', 'cache', function($http, $q, Working, $filter, $rootScope, cache) {
 	// default options
 	var opts = {
 		// access private or public
@@ -291,7 +378,6 @@ return {
 	$http.defaults.useXDomain = true;
 
 	var picasaWorking = function(key, val) {
-		return val;
 		if(key !== undefined) {
 			// set
 			if(val !== undefined) {
@@ -356,8 +442,6 @@ return {
 				}
 			});
 
-			console.log('URL:' + url);
-
 			return url;
 		},
 
@@ -388,19 +472,20 @@ return {
 				'kind': 'tag'
 			});
 		}
-
 	};
 
 
-    // Public API here
-    return {
+	// Public API here
+	return {
 
 	// params: max-results
 	getAlbums: function(params) {
+		params.picasaWorking = params && params.picasaWorking ? params.picasaWorking : 'picasaWorking';
 		picasaWorking(params.picasaWorking, true);
 
 		var url = params && params.absUrl ? params.absUrl : urls.albums(params);
 		var d = $q.defer();
+
 		$http.jsonp(url).success(function(data, status) {
 			// transform data with our filter - will exclude special picasa internal albums
 			data = $filter('picasaItemsFilter')(data, 'album');
@@ -416,20 +501,39 @@ return {
 		return d.promise;
 	},
 
+	// returns promise
+	getAlbumsCached: function(params) {
+		// try to get albums from a cache
+		var albums = cache.get('albums');
+
+		var d = $q.defer();
+
+		// there are no albums in a cache -> fetch them from google and put them into a cache
+		if(!albums) {
+			var promise = this.getAlbums(params).then(function(data) {
+				albums = $filter('picasaExcludeSystemAlbums')(data);
+				cache.put('albums', albums);
+				d.resolve(albums);
+			});
+		}
+		else {
+			d.resolve(albums);
+		}
+
+		return d.promise;
+	},
+
 	// params: albumid, max-results
 	getPhotos: function(params) {
+		params.picasaWorking = params && params.picasaWorking ? params.picasaWorking : 'picasaWorking';
 		picasaWorking(params.picasaWorking, true);
+
 		var url = params && params.nextLink ? params.nextLink + '&callback=JSON_CALLBACK' : urls.photos(params);
 		var d = $q.defer();
-		console.log(url);
 
 		$http.jsonp(url).success(function(data, status) {
-			console.log(data);
-			console.log('po sekacovi');
-
 			// transform data with our filter
 			data = $filter('picasaItemsFilter')(data, 'photo');
-
 			picasaWorking(params.picasaWorking, false);
 			d.resolve(data.data);
 		}).error(function(data, status) {
@@ -510,7 +614,7 @@ return {
 
 			val = item.exif['focallength'];
 			if(val) {
-				val = parseInt(val + 0) + " mm";
+				val = parseInt(val + 0, 10) + " mm";
 				exifArray.push({ "Ohnisko" : val });
 			}
 
@@ -550,7 +654,7 @@ return {
 		}
 	}
 	
-    }; // end of all public methods
+	}; // end of all public methods
 }])
 
 // input = data  (hash responded from a google which byt the way contains array of items (photos))
@@ -685,8 +789,6 @@ return {
 			}
 		}
 
-		console.log(out);
-
 		return out;
 	};
 }])
@@ -704,7 +806,6 @@ return {
 			if(input.feed && input.feed.entry) {
 				var outItems = [];
 				angular.forEach(input.feed.entry, function(entry) {
-					console.log('jo');
 					var item = picasaService.getBlankItemStructure();
 
 					// thumbnail url, w, h, alt

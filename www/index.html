@@ -39,21 +39,17 @@
 	</script>
 </head>
 
-<body ng-class="{'global-is-loading': isWorking()}">
+<body>
 
+
+<div class="spinner-overlay" spinner="isWorking()"></div>
 <div id="wallpaper"></div>
 <div id="overlay"></div>
 
 <a id="back-top" ng-click="scrollTop()" style="display: inline;"><i class="icon-chevron-up"></i></a>
 
-<div id="loading-global-holder" ng-show="isWorking()">
-	<div class="loading-global">
-		<a href="" ng-click="resetAllLoadings()"><span>Zavřít</span></a>
-	</div>
-</div>
-
 <!-- header -->
-<header id="header">
+<header id="header" >
 	<div class="container"> <!-- .container causes that it is 80% width and centered -->
 		<div class="row-fluid">
 		<div class="span12">

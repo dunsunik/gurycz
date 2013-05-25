@@ -36,6 +36,17 @@ angular.module( 'gury.photos', [
 .controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'Working', '$q', function PhotosController( $scope, titleService, picasaService, $routeParams, Working, $q ) {
 	titleService.setTitle( 'Photos' );
 
+
+	$scope.toggleWorking = function() {
+		
+		if(Working.isWorking('picasaWorking')) {
+			Working.unset('picasaWorking');
+		}
+		else {
+			Working.set('picasaWorking');
+		}
+	};
+
 	// type - tag, latest, album
 	var type = $routeParams.type;
 	$scope.type = $routeParams.type;
@@ -166,35 +177,28 @@ angular.module( 'gury.photos', [
 		var promise = picasaService.getAlbums();
 		promise.then(function(data) {
 			$scope.albums = data;
-			console.log('OK');
 			console.log(data);
 		});
 	};
 
 	$scope.getTags = function() {
-		console.log(picasaService);
 		var promise = picasaService.getTags();
 		promise.then(function(data) {
-			console.log('OK');
 			console.log(data);
 		});
 	};
 
 	$scope.getPhotosByTag = function(maxResults) {
-		console.log(picasaService);
 		var promise = picasaService.getLatestPhotos({'maxResults': maxResults, 'albumId': ''});
 		promise.then(function(data) {
-			console.log('OK');
 			console.log(data);
 		});
 	};
 
 
 	$scope.getLatestPhotos = function(maxResults) {
-		console.log(picasaService);
 		var promise = picasaService.getLatestPhotos({'maxResults': maxResults, 'albumId': ''});
 		promise.then(function(data) {
-			console.log('OK');
 			console.log(data);
 		});
 	};
@@ -224,37 +228,5 @@ angular.module( 'gury.photos', [
 		console.log('toggle fsMode');
 		$scope.fsModeEnabled = $scope.fsModeEnabled ? false : true;
 	};
-
-		
-/*
-	$.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",
-		{
-		//id: "51997044@N03",
-		tags: 'landscape wide',
-		tagmode: "all", 
-		format: "json" 
-		},
-		function(data) {
-			console.log(data);
-			var images = [];
-			angular.forEach(data.items, function(item) {
-				images.push({ src: item.media.m.replace('_m\\.jpg', '_b.jpg'), fade: 1500});
-			});
-			console.log(images);
-
-			// init vegas backgrounds
-			$.vegas('slideshow', {
-				delay: 13000,
-				backgrounds : images
-			});
-			$.vegas('overlay', {
-				src: 'assets/vegas/overlays/02.png'
-			});
-
-		}
-	);
-*/
-
-
 }]);
 

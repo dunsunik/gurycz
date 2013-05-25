@@ -49,10 +49,11 @@ angular.module( 'gury.portfolio', [
 
 	$(window.document).off( "scroll");
 
-	var promise;
+	// get albums and put them into a cache
+	picasaService.getAlbumsCached($rootScope.albumOpts).then(function(albums) {
+	});
 
 	/*
-
 	// get 5 latest photos
 	if(cache.get('latestTopPhotos') === undefined) {
 		promise = picasaService.getLatestPhotos({'maxResults': 5});
@@ -64,18 +65,6 @@ angular.module( 'gury.portfolio', [
 	else {
 			$scope.latestPhotos = data;
 	}
-*/
-
-	// get all albums and put them into a cache
-	if(cache.get('albums') === undefined) {
-		promise = picasaService.getAlbums({'max-results': 4, user: 'dunsun'});
-		promise.then(function(data) {
-			$rootScope.albums = data;
-			cache.put('albums', data);
-		});
-	}
-	else {
-		$rootScope.albums = cache.get('albums');
-	}
+	*/
 }]);
 

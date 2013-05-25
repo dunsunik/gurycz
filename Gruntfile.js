@@ -92,6 +92,7 @@ src: {
 			'<%= componentsdir %>/json3/lib/json3.min.js',
 			'<%= componentsdir %>/vegas/jquery.vegas.js',
 			'<%= componentsdir %>/enquire/dist/enquire.min.js',
+			'<%= srcdir %>/assets/spin.min.js',
 			'<%= srcdir %>/assets/xml2json.js',
 			'<%= srcdir %>/assets/jQuery.XDomainRequest.js'
 			], 

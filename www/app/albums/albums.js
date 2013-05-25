@@ -23,19 +23,10 @@ angular.module( 'gury.albums', [
 	// disable all handlers listening on a window scroll
 	$(window.document).off( "scroll");
 
-	// get all albums and put them into a cache
-	var albums = cache.get('albums');
-
-	if(!albums) {
-		var promise = picasaService.getAlbums({'max-results': 7, imagesize: 288}).then(function(data) {
-			data = $filter('picasaExcludeSystemAlbums')(data);
-			cache.put('albums', data);
-			$scope.years = $filter('picasaItemsByYearsFilter')(data);
-		});
-	}
-	else {
+	// get albums
+	picasaService.getAlbumsCached($rootScope.albumOpts).then(function(albums) {
 		$scope.years = $filter('picasaItemsByYearsFilter')(albums);
-	}
+	});
 
 }]);
 
