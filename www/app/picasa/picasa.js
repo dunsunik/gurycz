@@ -123,6 +123,47 @@ return {
 };
 }])
 
+
+// toggle fs mode
+// requires attribute fsModeEnabled
+.directive('toggleFsMode', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
+return {
+	restrict: 'A',
+	link: function(scope, elm, attrs) {
+
+		scope.$watch(attrs.toggleFsMode, function(newVal) {
+			if(newVal == true) {
+				startFsMode(document.documentElement);
+			}
+			else {
+				stopFsMode();
+			}
+		});
+
+		var startFsMode = function(element) {
+			if(element.requestFullScreen) {
+				element.requestFullScreen();
+			} else if(element.mozRequestFullScreen) {
+				element.mozRequestFullScreen();
+			} else if(element.webkitRequestFullScreen) {
+				element.webkitRequestFullScreen();
+			}
+		};
+
+		var stopFsMode = function() {
+			if(document.cancelFullScreen) {
+				document.cancelFullScreen();
+			} else if(document.mozCancelFullScreen) {
+				document.mozCancelFullScreen();
+			} else if(document.webkitCancelFullScreen) {
+				document.webkitCancelFullScreen();
+			}
+		};
+	}
+};
+}])
+
+
 .directive('globalKeydown', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
 return {
 	restrict: 'A',
@@ -441,7 +482,9 @@ return {
 			dateFormated: '',
 			dateYear: '',
 			title: '',
-			descr: ''
+			descr: '',
+			id: '',
+			isSystemAlbum: false
 		};
 		return item;
 	}
@@ -462,17 +505,15 @@ return {
 
 // input = data  (hash responded from a google which byt the way contains array of items (photos))
 // type = 'photo', 'album'
-// dataFormat - according to alt=jsonc or json
+// dataFormat - vy default it's not set and we guess it
+// it returns our normalized data structure containing photos array and more
 .filter('picasaItemsFilter', ['$filter', function($filter) {
 	return function(input, type, dataFormat) {
 		if(input) {
 			var filterName;
-			console.log(input);
 
 			// jsonc
 			if(input.data && input.data.items) {
-				console.log('super je to JSNC');
-
 				filterName = 'picasaItemsJsoncToJsoncFilter';
 			}
 			// rss
@@ -500,6 +541,7 @@ return {
 			nextLink: ''
 		};
 
+
 		if(input) {
 			// items
 			if(input.data && input.data.items) {
@@ -517,8 +559,8 @@ return {
 					}
 
 					// thumbnail url, w, h, alt - if it exists
-					if(entry.media.thumbnail && entry.media.thumbnail.url && entry.media.thumbnail.url.length > 0) {
-							var thumb = entry.media.thumbnail;
+					if(entry.media.thumbnails && entry.media.thumbnails.length>0 && entry.media.thumbnails[0].url && entry.media.thumbnails[0].url.length > 0) {
+							var thumb = entry.media.thumbnails[0];
 							item.thumb.url = thumb.url && thumb.url.length > 0 ? thumb.url : '';
 							item.thumb.w = thumb.width ? thumb.width : 'auto';
 							item.thumb.h = thumb.height ? thumb.height : 'auto';
@@ -545,6 +587,16 @@ return {
 						item.descr = entry.description;
 					}
 
+					// id
+					if(entry.id) {
+						item.id = entry.id;
+					}
+
+					// isSystemAlbum
+					if(entry && entry.type && entry.type.length > 0) {
+						item.isSystemAlbum = true;
+					}
+
 					// dateFormated, dateYear
 					try {
 						var date = new Date(Date.parse(entry.published));
@@ -562,35 +614,16 @@ return {
 			}
 
 			// nextLink
-			if(input.data && input.nextLink && input.data.nextLink.length >= 6) {
+			if(input.data && input.data.nextLink && input.data.nextLink.length >= 0) {
 				out.nextLink = input.data.nextLink;
 			}
 		}
 
+		console.log(out);
+
 		return out;
 	};
 }])
-/*
-
-			// jsonc format
-			if(input.data.items) {
-				var outItems = [];
-				angular.forEach(input.data.items, function(item) {
-					// album filter
-					if(type=="album") {
-						// do not include special picasa internal default albums
-						if(!item.type) {
-							outItems.push($filter('picasaItemFilter')(item, type));
-						}
-					}
-					// photo filter
-					else if(type=="photo") {
-						outItems.push($filter('picasaItemFilter')(item, type));
-					}
-				});
-				input.data.items = outItems;
-			}
-*/
 
 // transform json data format to jsonc data format
 .filter('picasaItemsJsonToJsoncFilter', ['$filter', 'picasaService', function($filter, picasaService) {
@@ -599,8 +632,6 @@ return {
 			items: [],
 			nextLink: ''
 		};
-console.log('ano json');
-console.log(input.feed.entry);
 
 		if(input) {
 			// items
@@ -675,57 +706,12 @@ console.log(input.feed.entry);
 
 		if(input) {
 			var data = x2js.xml_str2json(input);
-			console.log(input);
-			console.log('jede to');
-
-			console.log(data);
-			console.log('posekano');
 
 			// items
 			if(data.channel && data.channel.item_asArray) {
 				var outItems = [];
 				angular.forEach(data.channel.item_asArray, function(entry) {
-					console.log('jo');
 					var item = picasaService.getBlankItemStructure();
-
-					// thumbnail url, w, h, alt
-					if(entry.media$group && entry.media$group.media$thumbnail && entry.media$group.media$thumbnail.length > 0) {
-							var thumb = entry.media$group.media$thumbnail[0];
-							item.thumb.url = thumb.url && thumb.url.length > 0 ? thumb.url : '';
-							item.thumb.w = thumb.width ? thumb.width : 'auto';
-							item.thumb.h = thumb.height ? thumb.height : 'auto';
-							item.thumb.alt = '';
-					}
-
-					// image url, w, h, alt
-					if(entry.media$group && entry.media$group.media$content && entry.media$group.media$content.length > 0) {
-							var image = entry.media$group.media$content[0];
-							item.image.url = image.url && image.url.length > 0 ? image.url : '';
-							item.image.w = image.width ? image.width : 'auto';
-							item.image.h = image.height ? image.height : 'auto';
-							item.image.alt = '';
-					}
-
-					// title
-					if(entry.summary) {
-						item.title = entry.summary.$t;
-					}
-
-					// descr
-					if(entry.title) {
-						item.descr = entry.title.$t;
-					}
-
-					// dateFormated, dateYear
-					try {
-						var date = new Date(Date.parse(entry.published.$t));
-						item.dateYear = date.getFullYear();
-						item.dateFormated = date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
-					}
-					catch(e) {
-						item.dateFormated = "";
-						item.dateYear = "";
-					}
 
 					outItems.push(item);
 				});
@@ -781,14 +767,30 @@ console.log(input.feed.entry);
 	};
 }])
 
+// input = data containing albums
+// will remove ScrapBook and other System picasa albums 
+.filter('picasaExcludeSystemAlbums', ['$http', function($http) {
+	return function(input) {
+		if(input) {
+			var outItems = [];
+			angular.forEach(input.items, function(item) {
+				if(!item.isSystemAlbum) {
+					outItems.push(item);
+				}
+			});
+			input.items = outItems;
+		}
+		return input;
+	};
+}])
+
 // input = data.items.item  (photo)
 // type = 'photo', 'album'
 .filter('picasaItemsByYearsFilter', ['$http', function($http) {
 	return function(input) {
 
 		var years = [];
-
-		var prevYear = undefined;
+		var prevYear;
 		var items = [];
 
 		var breakYearRow = function(years, items, prevYear) {
@@ -815,9 +817,6 @@ console.log(input.feed.entry);
 		});
 
 		breakYearRow(years, items, prevYear);
-
-		console.log('years');
-		console.log(years);
 
 		return years;
 	};

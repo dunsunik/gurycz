@@ -18,7 +18,7 @@
 					<div class="span12 row-fluid one-album-row" ng-repeat="item in year.items">
 						<div class="span6 image">
 							<div class="pull-center thumbnail shadow">
-								<a ng-href="/#/photos/albumid/{{data.id}}">
+								<a ng-href="/#/photos/albumid/{{item.id}}">
 									<img ng-src="{{item.image.url}}" alt="" />
 								</a>
 							</div>
@@ -27,7 +27,7 @@
 							<a ng-href="/#/photos/albumid/{{data.id}}">
 								<h2>{{item.title}}</h2>
 								<h3>{{item.dateFormated}}</h3>
-								<p>{{item.description | shortenFilter:500}}</p>
+								<p>{{item.descr | shortenFilter:500}}</p>
 							</a>
 						</div>
 					</div>

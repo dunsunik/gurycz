@@ -42,11 +42,13 @@ angular.module( 'gury.photos', [
 
 	$scope.photosData = undefined;
 
+	$scope.fsModeEnabled = false;
+
+	$scope.exifInfoEnabled = false;
+
 	// show photos for a specified tag
 	if(type == "tag") {
-		picasaService.getPhotos({'max-results': 6, tag: $routeParams.val, picasaWorking: 'picasaWorking'}).then(function(data) {
-			console.log('prijely fota by tag');
-			console.log(data);
+		picasaService.getPhotos({'max-results': 20, tag: $routeParams.val, picasaWorking: 'picasaWorking'}).then(function(data) {
 			$scope.photosData = data;
 			$scope.resetActPhotoIndexToZero();
 		});
@@ -54,8 +56,6 @@ angular.module( 'gury.photos', [
 	// show latest photos
 	else if(type == "latest") {
 		picasaService.getPhotos({'max-results': 4, tag: $routeParams.val}).then(function(data) {
-			console.log('prijely fota latest');
-			console.log(data);
 			$scope.resetActPhotoIndexToZero();
 		});
 	}
@@ -63,8 +63,6 @@ angular.module( 'gury.photos', [
 	else if(type == "albumid") {
 		picasaService.getPhotos({'max-results': 20, 'albumid': $routeParams.val, picasaWorking: 'picasaWorking'}).then(function(data) {
 			$scope.photosData = data;
-			console.log('prijely fota by albumid');
-			console.log(data);
 			$scope.resetActPhotoIndexToZero();
 		});
 	}
@@ -116,15 +114,6 @@ angular.module( 'gury.photos', [
 		$scope.actPhotoIndex = $scope.actPhotoIndex <= 0 ? 0 :  $scope.actPhotoIndex - 1;
 		return $scope.actPhoto();
 	};
-
-
-	$scope.getNextItemsAbsUrl = function() {
-		var last = $scope.photos.length;
-		last = last > 0 ? last - 1 : 0;
-
-		return 'neco';
-	};
-
 
 	$scope.hasMorePhotos = function() {
 		return $scope.actPhotoIndex + 1 < photos().length ? true : false;
@@ -183,7 +172,6 @@ angular.module( 'gury.photos', [
 	};
 
 	$scope.getTags = function() {
-		console.log('jede');
 		console.log(picasaService);
 		var promise = picasaService.getTags();
 		promise.then(function(data) {
@@ -193,7 +181,6 @@ angular.module( 'gury.photos', [
 	};
 
 	$scope.getPhotosByTag = function(maxResults) {
-		console.log('jede');
 		console.log(picasaService);
 		var promise = picasaService.getLatestPhotos({'maxResults': maxResults, 'albumId': ''});
 		promise.then(function(data) {
@@ -204,7 +191,6 @@ angular.module( 'gury.photos', [
 
 
 	$scope.getLatestPhotos = function(maxResults) {
-		console.log('jede');
 		console.log(picasaService);
 		var promise = picasaService.getLatestPhotos({'maxResults': maxResults, 'albumId': ''});
 		promise.then(function(data) {
@@ -220,6 +206,17 @@ angular.module( 'gury.photos', [
 
 	$scope.closePhoto = function() {
 		$scope.modalIsVisible = false;
+	};
+
+	$scope.toggleExifInfo = function() {
+		console.log('toggle exif info');
+		$scope.exifInfoEnabled = $scope.exifInfoEnabled ? false : true;
+	};
+
+	// toogle fullscreen mode
+	$scope.toggleFsMode = function() {
+		console.log('toggle fsMode');
+		$scope.fsModeEnabled = $scope.fsModeEnabled ? false : true;
 	};
 
 		

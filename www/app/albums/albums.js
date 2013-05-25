@@ -20,6 +20,7 @@ angular.module( 'gury.albums', [
 .controller( 'AlbumsCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'cache', '$rootScope', '$filter', function PhotosController( $scope, titleService, picasaService, $routeParams, cache, $rootScope, $filter ) {
 	titleService.setTitle( 'Albumy' );
 
+	// disable all handlers listening on a window scroll
 	$(window.document).off( "scroll");
 
 	// get all albums and put them into a cache
@@ -27,6 +28,7 @@ angular.module( 'gury.albums', [
 
 	if(!albums) {
 		var promise = picasaService.getAlbums({'max-results': 7, imagesize: 288}).then(function(data) {
+			data = $filter('picasaExcludeSystemAlbums')(data);
 			cache.put('albums', data);
 			$scope.years = $filter('picasaItemsByYearsFilter')(data);
 		});

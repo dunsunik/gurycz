@@ -12,6 +12,10 @@
 		<img ng-src="{{actPhoto().image.url}}" width="{{actPhoto().image.width}}" width="{{actPhoto().image.height}}" ah-swipeleft="prevPhoto()" ah-swiperight="nextPhoto()" ah-swipeleft-options="{swipe_velocity: 0.1}" />
 	</div>
 
+	<div ng-show="exifInfoEnabled">
+		Exif info data
+	</div>
+
 	<div class="modal-footer">
 		<div class="pull-left">{{actPhoto().title}}</div>
 		<button class="btn btn-warning cancel" ng-click="prevPhoto()">Prev</button>
@@ -20,7 +24,10 @@
 	</div>
 </div>
 
-<div global-keydown="{37: 'prevPhoto()', 39: 'nextPhoto()'}" global-keydown-enabled="modalIsVisible"></div>
+<div 
+global-keydown="{8: 'prevPhoto()', 37: 'prevPhoto()', 32: 'nextPhoto()', 39: 'nextPhoto()', 13: 'toggleFsMode()', 70: 'toggleFsMode()', 73: 'toggleExifInfo()'}" global-keydown-enabled="modalIsVisible"
+toggle-fs-mode="fsModeEnabled"
+></div>
 
 
 <!-- Photos -->
