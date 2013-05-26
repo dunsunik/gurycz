@@ -7,9 +7,11 @@
 	</div>
 </script>
 
-<div modal="modalIsVisible" close="closePhoto()" options="modalOpts"  maximize-size-enabled="modalIsVisible">
+<div modal-events></div>
+
+<div modal="modalIsVisible" close="closePhoto()" options="modalOpts" >
 	<div>
-		<img ng-src="{{actPhoto().image.url}}" width="{{actPhoto().image.width}}" width="{{actPhoto().image.height}}" ah-swipeleft="prevPhoto()" ah-swiperight="nextPhoto()" ah-swipeleft-options="{swipe_velocity: 0.1}" />
+		<img ng-src="{{actPhoto().image.url | imgSrcFilter}}" width="{{actPhoto().image.w}}" height="{{actPhoto().image.h}}" ah-swipeleft="prevPhoto()" ah-swiperight="nextPhoto()" ah-swipeleft-options="{swipe_velocity: 0.1}" image-loaded="maximizePopup" />
 	</div>
 
 	<div ng-show="exifInfoEnabled">

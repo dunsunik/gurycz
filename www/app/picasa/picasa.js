@@ -64,110 +64,65 @@ return {
 };
 }])
 
-.directive('maximizeSize', ['Working', '$rootScope', '$timeout', 'picasaService', function(Working, $rootScope, $timeout, picasaService) {
+// just after image's content is fully loaded some action is fired
+.directive('imageLoaded', ['$rootScope', 'picasaService', '$parse', function($rootScope, picasaService, $parse) {
 return {
-	restrict: 'AC',
+	restrict: 'A',
 	link: function(scope, elm, attrs) {
-		var photoData = scope.actPhoto();
-		var enabled = scope.modalIsVisible;
-
-		console.log(elm);
-
-		console.log('w:' + elm.find('img').width());
-		console.log('h:' + elm.find('img').height());
+		var fn = $parse(attrs.imageLoaded);
 
 		var isIE78 = function() {																				 
-			return jQuery.support.leadingWhitespace == false ? true : false;
+			return jQuery.support.leadingWhitespace === false ? true : false;
 		};
-		
-		// just a proxy to img.load() method since IE7 or IE8 does not fire on load finish callback when images are cached in a browser
-		var loadImageAsyncProxy = function(imgEl, src, cb) {
-			if(imgEl) { 
-				src = src ? src : ''; 
-				src = isIE78() ? (src + "?" + new Date().getTime()) : src;
-				
-				// caching can break load event calling (load is not called if image is already cached)
-				// better solution - https://github.com/desandro/imagesloaded
-				imgEl.attr('src', src).load(cb);
+
+		// hack for IE7,8 
+		var getNaturalDimension = function(imgEl) {
+			if(isIE78()) {
+				var tmpImage = new Image();
+				tmpImage.src = imgEl.attr('src');
+				return { w: tmpImage.width, h: tmpImage.height };
+			}
+			else {
+				return { w: imgEl[0].naturalWidth, h: imgEl[0].naturalHeight };
 			}
 		};
 
+		$(elm).load(function() {
+			var dim = getNaturalDimension($(elm));
+			fn(scope)(elm, dim.w, dim.h);
+		});
+	}
+};
+}])
+
+.directive('modalEvents', ['Working', '$rootScope', '$timeout', 'picasaService', function(Working, $rootScope, $timeout, picasaService) {
+return {
+	restrict: 'A',
+	link: function(scope, elm, attrs) {
 		var handle = function() {
-			console.log(enabled);
-			console.log(photoData);
-			if(enabled && photoData && photoData.image && photoData.image.w && photoData.image.h) {
+				var photoData = scope.actPhoto();
 				var imgW = photoData.image.w;
 				var imgH = photoData.image.h;
-
-				console.log(photoData);
-				var imgScale = imgW / imgH;
-
-				var docW = $(window).width();
-				var docH = ($(window).height()-70) > 0 ? ($(window).height()-70) : 0;
-				var docScale = docW / docH;				
-
-				var scale = 1;
-
-				// documment is wider then img
-				if(docScale < imgScale) {
-					// img's width is higher then document's width so scale it down
-					if(docW <= imgW) {
-						scale = docW / imgW;
-						imgW = scale * imgW;
-						imgH = scale * imgH;
-					}
-					else {
-						imgW = imgW;
-						imgH = imgH;
-					}
-				}
-				else {
-					// img's width is higher then document's width so scale it down
-					if(docH <= imgH) {
-						scale = docH / imgH;
-						//scale = 1;
-						imgW = scale * imgW;
-						imgH = scale * imgH;
-					}
-					else {
-						imgW = imgW;
-						imgH = imgH;
-					}
-				}
-
-				$(elm).css('position', 'fixed');
-				$(elm).css('margin-left', '0');
-
-				$(elm).width(Math.floor(imgW));
-				$(elm).height(Math.floor(imgH));
-
-				// center a photo
-				$(elm).css('left', Math.floor((docW - imgW) / 2));
-				$(elm).css('top', (Math.floor((docH - imgH) / 2) + 5 ));
-			}
+				modal = $('.modal')[0];
+				picasaService.maximizeAndCenter(modal, imgW, imgH);
 		};
 
-		handle();
-
-		var unregister1 = scope.$watch('modalIsVisible', function(newVal) {
-			enabled = newVal;
-
+		scope.$watch('modalIsVisible', function(newVal) {
 			if(!newVal) {
-				unregister2();
-				unregister1();
+				$('body').css('overflow', 'auto');
+				$(window).off('resize', handle);
 			}
-			handle();
+			else {
+				$('body').css('overflow', 'hidden');
+				$(window).on('resize', handle);
+			}
 		});
 
-		var unregister2 = scope.$watch('actPhoto()', function(newVal) {
-			photoData = newVal;
-			handle();
-			picasaService.tuneExifData(newVal);
+		scope.$watch('actPhoto()', function(newVal) {
+			if(newVal) {
+				picasaService.tuneExifData(newVal);
+			}
 		});
-
-		$(window).off('resize', handle);
-
-		$(window).on('resize', handle);
 
 		scope.$on('destroy', function() {
 			$(window).off('resize', handle);
@@ -595,6 +550,63 @@ return {
 		return item;
 	},
 
+	// maximize and center elm
+	maximizeAndCenter: function(elm, imgW, imgH) {
+		if(elm && imgW && imgH || 1==1) {
+			console.log('je to tak');
+			imgW = parseInt(imgW, 10);
+			imgH = parseInt(imgH, 10);
+
+			var imgScale = imgW / imgH;
+
+			var docW = $(window).width();
+			var docH = ($(window).height()-70) > 0 ? ($(window).height()-70) : 0;
+			var docScale = docW / docH;				
+
+			var scale = 1;
+
+			// documment is wider then img
+			if(docScale < imgScale) {
+				// img's width is higher then document's width so scale it down
+				if(docW <= imgW) {
+					scale = docW / imgW;
+					imgW = scale * imgW;
+					imgH = scale * imgH;
+				}
+				else {
+					imgW = imgW;
+					imgH = imgH;
+				}
+			}
+			else {
+				// img's width is higher then document's width so scale it down
+				if(docH <= imgH) {
+					scale = docH / imgH;
+					//scale = 1;
+					imgW = scale * imgW;
+					imgH = scale * imgH;
+				}
+				else {
+					imgW = imgW;
+					imgH = imgH;
+				}
+			}
+
+			console.log(imgW);
+			console.log(imgH);
+
+			$(elm).css('position', 'fixed');
+			$(elm).css('margin-left', '0');
+
+			$(elm).width(Math.floor(imgW));
+			$(elm).height(Math.floor(imgH));
+
+			// center a photo
+			$(elm).css('left', Math.floor((docW - imgW) / 2));
+			$(elm).css('top', (Math.floor((docH - imgH) / 2) + 5 ));
+		}
+	},
+
 	tuneExifData: function(item) {
 		if(!item.exifTuned && item.exif) {
 			var exifArray = [];
@@ -989,6 +1001,20 @@ return {
 	};
 }])
 
+// for IE78 there will be added ?time to a src so that it's not cached by IE78 browsers
+.filter('imgSrcFilter', ['$http', function($http) {
+	return function(src) {
+		
+		var isIE78 = function() {																				 
+			return jQuery.support.leadingWhitespace === false ? true : false;
+		};
+		
+		src = src ? src : ''; 
+		src = isIE78() ? (src + "?" + new Date().getTime()) : src;
+
+		return src;
+	};
+}])
 
 // input = data.items.item  (photo)
 // type = 'photo', 'album'

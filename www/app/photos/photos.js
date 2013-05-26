@@ -228,5 +228,13 @@ angular.module( 'gury.photos', [
 		console.log('toggle fsMode');
 		$scope.fsModeEnabled = $scope.fsModeEnabled ? false : true;
 	};
+
+	$scope.maximizePopup = function(imgElm, imgW, imgH) {
+		$scope.actPhoto().image.w = imgW;
+		$scope.actPhoto().image.h = imgH;
+
+		picasaService.tuneExifData($scope.actPhoto());
+		picasaService.maximizeAndCenter( $('.modal'), imgW, imgH);
+	};
 }]);
 
