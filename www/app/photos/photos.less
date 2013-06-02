@@ -33,21 +33,61 @@
 	        user-select: none;
 }
 
+
+@modal-border: 4px;
+.modal-styling {
+	border: none;
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	-o-border-radius: 0px;
+	border-radius: 0px;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	-o-box-shadow: none;
+	box-shadow: none;
+}
+
 .dynamic-modal {
 	width: auto;
 	height: auto;
 	max-width: 100% !important;
 	max-height: 100% !important;
+	background-color: #555;
+	.modal-styling;
+	padding: @modal-border;
+
+	.dynamic-modal-body {
+		text-align: center;
+		.modal-styling;
+	}
+
+	.dynamic-modal-footer {
+		padding: 6px 6px 6px 6px;
+		background-color: #000;
+		opacity: 0.8;
+		text-align: right;
+		z-index: 300;
+		position: relative;
+		opacity: 0.8;
+		.modal-styling;
+		margin-top: -42px;
+
+		.title {
+			color: #fff;
+			margin-top: 4px;
+		}
+	}
 }
 
 .exif {
 	position: absolute;
-	top: 0px;
-	left: 0px;
+	bottom: @modal-border;
+	left: @modal-border;
 	background-color: #111;
-	opacity: 0.85;
+	opacity: 1;
 	color: @TitleColor;
 	padding: 6px;
+	z-index: 500;
 
 	li > div {
 		float: none;

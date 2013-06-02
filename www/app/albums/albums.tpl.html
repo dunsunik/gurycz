@@ -3,6 +3,7 @@
 	<div class="row-fluid">
 		<div class="span12 header first-header">
 			<hgroup>
+				<a href="" ng-click="goBack()" class="goback">&lt;&lt; zpět</a>
 				<h2>Alba</h2>
 				<h3>Akce, výlety, dýchánky</h3>
 			</hgroup>
@@ -25,7 +26,7 @@
 						</div>
 						<div class="span6 description">
 							<a ng-href="/#/photos/albumid/{{data.id}}">
-								<h2>{{item.title}}</h2>
+								<h2>{{item.title | shortenFilter:30}}</h2>
 								<h3>{{item.dateFormated}}</h3>
 								<p>{{item.descr | shortenFilter:500}}</p>
 							</a>

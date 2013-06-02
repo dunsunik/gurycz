@@ -1,6 +1,5 @@
 angular.module( 'gury.about', [
-	'gury.base',
-	'ui.bootstrap'
+	'gury.base'
 ])
 
 .config([ '$routeProvider', function config( $routeProvider ) {

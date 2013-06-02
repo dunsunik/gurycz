@@ -24,17 +24,17 @@
 			padding: 5px 10px 5px 5px;
 			h2 {
 				margin: 9px 0px 0px 0px;
-				color: @TitleColor;
+				color: @TitleColorDark;
 				font-size: 28px;
 				line-height: 32px;
 				text-align: left;
 			}
 
 			h3 {
-				margin-top: 15px;
+				margin-top: 17px;
 				color: #000;
-				font-size: 20px;
-				line-height: 22px;
+				font-size: 16px;
+				line-height: 16px;
 				text-align: left;
 			}
 
@@ -47,5 +47,17 @@
 				text-align: left;
 			}
 		}
+	}
+}
+
+
+/* Landscape phones and down */
+@media (max-width: 767px)
+{
+	#albums .one-album-row .description {
+		max-width: 288px !important;
+		margin: 0 auto !important;
+		float: none !important;
+		text-align: center !important;
 	}
 }

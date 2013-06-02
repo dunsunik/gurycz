@@ -1,6 +1,4 @@
 angular.module( 'gury', [
-	'ui.bootstrap',
-	'ui.directives',
 	'ahTouch',
 	'app-templates',
 	'component-templates',

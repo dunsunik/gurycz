@@ -36,7 +36,6 @@ angular.module( 'gury.photos', [
 .controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'Working', '$q', function PhotosController( $scope, titleService, picasaService, $routeParams, Working, $q ) {
 	titleService.setTitle( 'Photos' );
 
-
 	$scope.toggleWorking = function() {
 		
 		if(Working.isWorking('picasaWorking')) {
@@ -56,6 +55,10 @@ angular.module( 'gury.photos', [
 	$scope.fsModeEnabled = false;
 
 	$scope.exifInfoEnabled = false;
+
+	$scope.modal = {
+		isVisible : false
+	};
 
 	// show photos for a specified tag
 	if(type == "tag") {
@@ -77,14 +80,6 @@ angular.module( 'gury.photos', [
 			$scope.resetActPhotoIndexToZero();
 		});
 	}
-
-
-	// modal dialog settings
-	$scope.modalOpts = {
-		backdropFade: false,
-		dialogFade: false,
-		dialogClass: 'maximize-size modal'
-	};
 
 	// get photos items array - just a shortcut for $scope.photosData.items
 	var photos = function() {
@@ -177,21 +172,21 @@ angular.module( 'gury.photos', [
 		var promise = picasaService.getAlbums();
 		promise.then(function(data) {
 			$scope.albums = data;
-			console.log(data);
+			Gury.log(data);
 		});
 	};
 
 	$scope.getTags = function() {
 		var promise = picasaService.getTags();
 		promise.then(function(data) {
-			console.log(data);
+			Gury.log(data);
 		});
 	};
 
 	$scope.getPhotosByTag = function(maxResults) {
 		var promise = picasaService.getLatestPhotos({'maxResults': maxResults, 'albumId': ''});
 		promise.then(function(data) {
-			console.log(data);
+			Gury.log(data);
 		});
 	};
 
@@ -199,22 +194,20 @@ angular.module( 'gury.photos', [
 	$scope.getLatestPhotos = function(maxResults) {
 		var promise = picasaService.getLatestPhotos({'maxResults': maxResults, 'albumId': ''});
 		promise.then(function(data) {
-			console.log(data);
+			Gury.log(data);
 		});
 	};
 
 	$scope.openPhoto = function(index) {
 		$scope.actPhotoIndex = index;
-		$scope.modalIsVisible = true;
+		$scope.modal.isVisible = true;
 	};
 
 	$scope.closePhoto = function() {
-		$scope.modalIsVisible = false;
+		$scope.modal.isVisible = false;
 	};
 
 	$scope.toggleExifInfo = function() {
-		console.log('toggle exif info');
-
 		// will become enabled -> regenerate and tidy exif data
 		if(!$scope.exifInfoEnabled) {
 			picasaService.tuneExifData($scope.actPhoto());
@@ -225,16 +218,41 @@ angular.module( 'gury.photos', [
 
 	// toogle fullscreen mode
 	$scope.toggleFsMode = function() {
-		console.log('toggle fsMode');
 		$scope.fsModeEnabled = $scope.fsModeEnabled ? false : true;
 	};
 
+	// is called either from imageLoaded directive after an image is fully loaded
+	// or from windowResized directive when dimensions of a window browser have changed
 	$scope.maximizePopup = function(imgElm, imgW, imgH) {
-		$scope.actPhoto().image.w = imgW;
-		$scope.actPhoto().image.h = imgH;
+		if(imgW) {
+			$scope.actPhoto().image.w = imgW;
+		}
+		else {
+			imgW = $scope.actPhoto().image.w;
+		}
+		if(imgH) {
+			$scope.actPhoto().image.h = imgH;
+		}
+		else {
+			imgH = $scope.actPhoto().image.h;
+		}
+
+		imgElm = imgElm ? imgElm : $('#simple-modal');
 
 		picasaService.tuneExifData($scope.actPhoto());
-		picasaService.maximizeAndCenter( $('.modal'), imgW, imgH);
+		picasaService.maximizeAndCenter( imgElm, $('#simple-modal'), imgW, imgH);
 	};
+
+	$scope.toggleModalFooter = function() {
+		$scope.modal.footerIsVisible = $scope.modal.footerIsVisible ? false : true;
+	};
+
+
+	$scope.$watch('actPhoto()', function(newVal) {
+		if(newVal) {
+			picasaService.tuneExifData(newVal);
+		}
+	});
+
 }]);
 

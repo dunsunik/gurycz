@@ -64,7 +64,7 @@ return {
 };
 }])
 
-// just after image's content is fully loaded some action is fired
+// just after image's content is fully loaded a specified action is fired
 .directive('imageLoaded', ['$rootScope', 'picasaService', '$parse', function($rootScope, picasaService, $parse) {
 return {
 	restrict: 'A',
@@ -75,8 +75,9 @@ return {
 			return jQuery.support.leadingWhitespace === false ? true : false;
 		};
 
-		// hack for IE7,8 
+		// returns an image's real width and height
 		var getNaturalDimension = function(imgEl) {
+			// hack for IE7,8 
 			if(isIE78()) {
 				var tmpImage = new Image();
 				tmpImage.src = imgEl.attr('src');
@@ -89,78 +90,121 @@ return {
 
 		$(elm).load(function() {
 			var dim = getNaturalDimension($(elm));
+			// fire an action and pass some params into it
 			fn(scope)(elm, dim.w, dim.h);
 		});
 	}
 };
 }])
 
-.directive('modalEvents', ['Working', '$rootScope', '$timeout', 'picasaService', function(Working, $rootScope, $timeout, picasaService) {
+.directive('simpleModal', ['Working', '$rootScope', '$timeout', 'picasaService', function(Working, $rootScope, $timeout, picasaService) {
 return {
 	restrict: 'A',
 	link: function(scope, elm, attrs) {
-		var handle = function() {
-				var photoData = scope.actPhoto();
-				var imgW = photoData.image.w;
-				var imgH = photoData.image.h;
-				modal = $('.modal')[0];
-				picasaService.maximizeAndCenter(modal, imgW, imgH);
-		};
+		var isVisible = scope.$eval(attrs.simpleModal);
 
-		scope.$watch('modalIsVisible', function(newVal) {
-			if(!newVal) {
-				$('body').css('overflow', 'auto');
-				$(window).off('resize', handle);
+		// init modal but do not show it yet
+		$(elm).modal({show: isVisible});
+
+		// show
+		$(elm).on('show', function() {
+			$timeout(function() {
+				try {
+					scope.$eval(attrs.show);
+				}
+				catch(e) {
+				}
+			}, 0);
+			/*
+			scope.$apply(function() {
+				try {
+					scope.$eval(attrs.show);
+				}
+				catch(e) {
+				}
+			});
+			*/
+		});
+
+		// shown
+		$(elm).on('shown', function() {
+			scope.$apply(function() {
+				try {
+					scope.$eval(attrs.shown);
+				}
+				catch(e) {
+				}
+			});
+		});
+
+		// hide
+		$(elm).on('hide', function() {
+			var action = function() {
+				try { scope.$eval(attrs.hide); } catch(e) {}
+			};
+
+			// is digest or apply in a progress ?
+			if(scope.$$phase) {
+				action();
 			}
 			else {
-				$('body').css('overflow', 'hidden');
-				$(window).on('resize', handle);
+				scope.$apply(function() { action(); });
 			}
 		});
 
-		scope.$watch('actPhoto()', function(newVal) {
+		// hidden
+		$(elm).on('hidden', function() {
+			scope.$apply(function() {
+				try {
+					scope.$eval(attrs.hidden);
+				}
+				catch(e) {
+				}
+			});
+		});
+
+		// watch isVisible
+		scope.$watch(attrs.simpleModal, function(newVal) {
+			// open modal
 			if(newVal) {
-				picasaService.tuneExifData(newVal);
+				$('body').css('overflow', 'hidden');
+				$(elm).modal('show');
 			}
-		});
-
-		scope.$on('destroy', function() {
-			$(window).off('resize', handle);
+			// hide modal
+			else {
+				$('body').css('overflow', 'auto');
+				$(elm).modal('hide');
+			}
 		});
 	}
 };
 }])
 
-.directive('windowResized', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
+.directive('windowResized', ['Working', '$rootScope', '$timeout', '$parse', function(Working, $rootScope, $timeout, $parse) {
 return {
 	restrict: 'A',
 	link: function(scope, elm, attrs) {
 		var enabled = scope.$eval(attrs.windowResizedEnabled);
 
-		scope.$watch(attrs.windowResizedEnabled, function(newVal) {
-			enabled = newVal;
-		});
-
-		var handle = function(e) {
-			if(enabled) {
-				if(angular.isDefined(attrs.windowResized)) {
-					scope.$apply(function() {
-						try {
-							scope.$eval(attrs.windowResized);
-						}
-						catch(e) {
-						}
-					});
-				}
-			}
+		// this functin is fired whenever window resizes
+		var fn = function() {
+			var f = $parse(attrs.windowResized);
+			f(scope)(elm);
 		};
 
-		$(window).resize(function(e) {
-			handle(e);
+		scope.$watch(attrs.windowResizedEnabled, function(newVal) {
+			enabled = newVal;
+			
+			// first disabled all previous resize listeners
+			$(window).off('resize', fn);
+
+			if(enabled) {
+				$(window).on('resize', fn);
+			}
 		});
 
 		scope.$on('destroy', function() {
-			$(window).off('resize', handle);
+			$(window).off('resize', fn);
 		});
 	}
 };
@@ -206,13 +250,12 @@ return {
 };
 }])
 
-
 .directive('globalKeydown', ['Working', '$rootScope', '$timeout', function(Working, $rootScope, $timeout) {
 return {
 	restrict: 'A',
 	link: function(scope, elm, attrs) {
 		var keysEvents = scope.$eval(attrs.globalKeydown);
-		var enabled = scope.$eval(attrs.globalKeydownEnabled);
+		var enabled = attrs.globalKeydownEnabled;
 
 		scope.$watch(attrs.globalKeydownEnabled, function(newVal) {
 			enabled = newVal;
@@ -550,17 +593,18 @@ return {
 		return item;
 	},
 
-	// maximize and center elm
-	maximizeAndCenter: function(elm, imgW, imgH) {
-		if(elm && imgW && imgH || 1==1) {
-			console.log('je to tak');
+	// maximize elmForScaling (img usually)
+	// center elmForCentering (parent usually)
+	maximizeAndCenter: function(elmForScaling, elmForCentering, imgW, imgH) {
+		if(imgW && imgH || 1==1) {
 			imgW = parseInt(imgW, 10);
 			imgH = parseInt(imgH, 10);
+			var footerHeight = 20;
 
 			var imgScale = imgW / imgH;
 
 			var docW = $(window).width();
-			var docH = ($(window).height()-70) > 0 ? ($(window).height()-70) : 0;
+			var docH = ($(window).height()-footerHeight) > 0 ? ($(window).height()-footerHeight) : 0;
 			var docScale = docW / docH;				
 
 			var scale = 1;
@@ -592,18 +636,18 @@ return {
 				}
 			}
 
-			console.log(imgW);
-			console.log(imgH);
+			// scale (maximize) element
+			if(elmForScaling) {
+				$(elmForScaling).width(Math.floor(imgW));
+				$(elmForScaling).height(Math.floor(imgH));
+			}
 
-			$(elm).css('position', 'fixed');
-			$(elm).css('margin-left', '0');
-
-			$(elm).width(Math.floor(imgW));
-			$(elm).height(Math.floor(imgH));
-
-			// center a photo
-			$(elm).css('left', Math.floor((docW - imgW) / 2));
-			$(elm).css('top', (Math.floor((docH - imgH) / 2) + 5 ));
+			// center element
+			if(elmForCentering) {
+				$(elmForCentering).css('margin-left', '0');
+				$(elmForCentering).css('left', Math.floor((docW - imgW) / 2));
+				$(elmForCentering).css('top', (Math.floor((docH - imgH) / 2) + 5 ));
+			}
 		}
 	},
 
@@ -620,7 +664,7 @@ return {
 
 			val = item.exif['exposure'];
 			if(val) {
-				val = "1/" + (1 / item.exif['exposure']) + " s";
+				val = "1/" + Math.round(1 / val) + " s";
 				exifArray.push({ "Čas" : val });
 			}
 

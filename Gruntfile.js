@@ -96,7 +96,7 @@ src: {
 			'<%= srcdir %>/assets/xml2json.js',
 			'<%= srcdir %>/assets/jQuery.XDomainRequest.js'
 			], 
-	jsApp:	[ '<%= srcdir %>/**/*.js', '!<%= srcdir %>/**/*.spec.js', '!<%= componentsdir %>/**/*' ], 
+	jsApp:	[ '<%= srcdir %>/app/**/*.js', '!<%= srcdir %>/**/*.spec.js', '!<%= componentsdir %>/**/*' ], 
 	atpl:		[ '<%= srcdir %>/app/**/*.tpl.html' ],
 	ctpl:		[ '<%= componentsdir %>/**/*.tpl.html' ],
 	tpljs:	[ '<%= distdir %>/tmp/**/*.js' ],
@@ -144,7 +144,7 @@ copy: {
 */
 concat: {
 	/**
-	* The `dist` target is the concatenation of our application source code
+	* The `app` target is the concatenation of our application source code
 	* into a single file. All files matching what's in the `src.js`
 	* configuration property above will be included in the final build.
 	*
@@ -156,25 +156,28 @@ concat: {
 	* operation. In this case, we are adding a banner to the top of the file,
 	* based on the above definition of `meta.banner`. This is simply a 
 	* comment with copyright informaiton.
+	*
+	* Later these will be uglified (minified)
 	*/
-	dist: {
-	options: {
-	banner: '<%= meta.banner %>'
-	},
-	src: [ 'module.prefix', '<%= src.jsApp %>', '<%= src.tpljs %>', 'module.suffix' ],
-	dest: '<%= distdir %>/assets/<%= pkg.name %>.js'
+	app: {
+		options: {
+			banner: '<%= meta.banner %>'
+		},
+
+		src: [ 'module.prefix', '<%= src.jsApp %>', '<%= src.tpljs %>', 'module.suffix' ],
+
+		dest: '<%= distdir %>/assets/<%= pkg.name %>.js'
 	},
 
 	/**
 	* The `libs` target is for all third-party libraries we need to include
 	* in the final distribution. They will be concatenated into a single
-	* `libs.js` file.  One could combine this with the above for a single
-	* payload, but then concatenation order will obviously be important to
-	* get right.
+	* `libs.js` file. These will not be uglified (minified)
 	*/
 	libs: {
-	src: [ 'module.prefix', '<%= src.jsLibs %>', 'module.suffix' ],
-	dest: '<%= distdir %>/assets/libs.js'
+		src: [ 'module.prefix', '<%= src.jsLibs %>', 'module.suffix' ],
+
+		dest: '<%= distdir %>/assets/libs.js'
 	}
 },
 
@@ -183,13 +186,14 @@ concat: {
 */
 uglify: {
 	options: {
-	banner: '<%= meta.banner %>'
+		banner: '<%= meta.banner %>'
 	},
-	dist: {
-	files: {
-	'<%= distdir %>/assets/<%= pkg.name %>.min.js': [ '<%= distdir %>/assets/<%= pkg.name %>.js' ]
-	// '<%= distdir %>/assets/libs.min.js': [ '<%= distdir %>/assets/libs.js' ]
-	}
+
+	// app target - uglifies our app code previously concated
+	app: {
+		files: {
+			'<%= distdir %>/assets/<%= pkg.name %>.min.js': [ '<%= distdir %>/assets/<%= pkg.name %>.js' ]
+		}
 	}
 },
 
@@ -200,15 +204,15 @@ uglify: {
 */
 recess: {
 	build:  {
-	src: [ '<%= src.less %>' ],
-	dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
-	options: {
-	compile: true,
-	compress: false,
-	noUnderscores: false,
-	noIDs: false,
-	zeroUnits: false
-	}
+		src: [ '<%= src.less %>' ],
+		dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
+		options: {
+			compile: true,
+			compress: false,
+			noUnderscores: false,
+			noIDs: false,
+			zeroUnits: false
+		}
 	}
 },
 
@@ -217,15 +221,15 @@ recess: {
 */
 recessdev: {
 	build:  {
-	src: [ '<%= src.less %>' ],
-	dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
-	options: {
-	compile: true,
-	compress: false,
-	noUnderscores: false,
-	noIDs: false,
-	zeroUnits: false
-	}
+		src: [ '<%= src.less %>' ],
+		dest: '<%= distdir %>/assets/<%= pkg.name %>.css',
+		options: {
+			compile: true,
+			compress: false,
+			noUnderscores: false,
+			noIDs: false,
+			zeroUnits: false
+		}
 	}
 },
 
@@ -238,27 +242,27 @@ recessdev: {
 */
 jshint: {
 	src: [ 
-	'Gruntfile.js', 
-	'<%= src.jsApp %>', 
-	'<%= src.tpljs %>',
-	'<%= src.unit %>',
-	'!<%= componentsdir %>/**/*',
-	'!<%= srcdir %>/assets/*'
+		'Gruntfile.js', 
+		'<%= src.jsApp %>', 
+		'<%= src.tpljs %>',
+		'<%= src.unit %>',
+		'!<%= componentsdir %>/**/*',
+		'!<%= srcdir %>/assets/*'
 	],
 	test: [
-	'<%= src.unit %>'
+		'<%= src.unit %>'
 	],
 	gruntfile: [
-	'Gruntfile.js'
+		'Gruntfile.js'
 	],
 	options: {
-	curly: true,
-	immed: true,
-	newcap: true,
-	noarg: true,
-	sub: true,
-	boss: true,
-	eqnull: true
+		curly: true,
+		immed: true,
+		newcap: true,
+		noarg: true,
+		sub: true,
+		boss: true,
+		eqnull: true
 	},
 	globals: {}
 },
@@ -275,18 +279,18 @@ html2js: {
 	* These are the templates from `src/app`.
 	*/
 	app: {
-	src: [ '<%= src.atpl %>' ],
-	base: '<%= srcdir %>/app',
-	dest: 'dist/tmp'
+		src: [ '<%= src.atpl %>' ],
+		base: '<%= srcdir %>/app',
+		dest: 'dist/tmp'
 	},
 
 	/**
 	* These are the templates from `src/components`.
 	*/
 	component: {
-	src: [ '<%= src.ctpl %>' ],
-	base: '<%= componentsdir %>',
-	dest: 'dist/tmp'
+		src: [ '<%= src.ctpl %>' ],
+		base: '<%= componentsdir %>',
+		dest: 'dist/tmp'
 	}
 },
 
@@ -316,8 +320,8 @@ delta: {
 	* the changes.
 	*/
 	gruntfile: {
-	files: 'Gruntfile.js',
-	tasks: [ 'jshint:gruntfile' ]
+		files: 'Gruntfile.js',
+		tasks: [ 'jshint:gruntfile' ]
 	},
 
 	/**
@@ -325,11 +329,11 @@ delta: {
 	* (excepting uglification).
 	*/
 	src: {
-	files: [ 
-	'<%= src.jsApp %>',
-	'<%= src.jsLibs %>'
-	],
-	tasks: [ 'jshint:src', 'concat:dist', 'ngmin' ]
+		files: [ 
+			'<%= src.jsApp %>',
+			'<%= src.jsLibs %>'
+		],
+		tasks: [ 'jshint:src', 'concat:app']
 	},
 
 	/**
@@ -337,37 +341,37 @@ delta: {
 	* files, so this is probably not very useful.
 	*/
 	assets: {
-	files: [ 
-	'<%= srcdir %>/assets/**/*'
-	],
-	tasks: [ 'copy' ]
+		files: [ 
+			'<%= srcdir %>/assets/**/*'
+		],
+		tasks: [ 'copy' ]
 	},
 
 	/**
 	* When index.html changes, we need to compile just it.
 	*/
 	html: {
-	files: [ '<%= src.html %>' ],
-	tasks: [ 'index' ]
+		files: [ '<%= src.html %>' ],
+		tasks: [ 'index' ]
 	},
 
 	/**
-	* When our templates change, we only add them to the template cache.
+	* When our html templates change, we only add them to the template cache.
 	*/
 	tpls: {
-	files: [ 
-	'<%= src.atpl %>', 
-	'<%= src.ctpl %>'
-	],
-	tasks: [ 'html2js', 'concat:dist', 'uglify:dist' ]
+		files: [ 
+			'<%= src.atpl %>', 
+			'<%= src.ctpl %>'
+		],
+		tasks: [ 'html2js', 'concat:app' ]
 	},
 
 	/**
 	* When the CSS files change, we need to compile and minify just them.
 	*/
 	less: {
-	files: [ '<%= srcdir %>/**/*.less' ],
-	tasks: [ 'recess' ]
+		files: [ '<%= srcdir %>/**/*.less' ],
+		tasks: [ 'recess' ]
 	},
 
 	/**
@@ -376,35 +380,33 @@ delta: {
 	* templates, we must also run the `html2js` task.
 	*/
 	unittest: {
-	files: [
-	'<%= src.unit %>'
-	],
-	tasks: [ 'jshint:test', 'test:unit' ]
+		files: [ '<%= src.unit %>' ],
+		tasks: [ 'jshint:test', 'test:unit' ]
 	}
 },
 
-	/**
-	* Expand angular injection so that it works after any minification
-	*/
-	ngmin : {
-		files: {
-			src: [ '<%= distdir %>/assets/<%= pkg.name %>.js'],
-			dest: [ '<%= distdir %>/assets/<%= pkg.name %>.js']
-		}
-	},
-
-
-	rsync: {
-		deploy: {
-			src: 'dist/',
-			dest: '/home/dunsun/public_html',
-			host: 'proxy',
-			recursive: true,
-			syncDest: false
-		}
+/**
+* Expand angular injection so that it works after any minification
+*/
+ngmin : {
+	files: {
+		src: [ '<%= distdir %>/assets/<%= pkg.name %>.js'],
+		dest: [ '<%= distdir %>/assets/<%= pkg.name %>.js']
 	}
+},
 
-});
+
+rsync: {
+	deploy: {
+		src: 'dist/',
+		dest: '/home/dunsun/public_html',
+		host: 'proxy',
+		recursive: true,
+		syncDest: false
+	}
+}
+
+}); // end of grunt initConfig
 
 /**
 * In order to make it safe to just compile or copy *only* what was changed,
@@ -414,7 +416,12 @@ delta: {
 * before watching for changes.
 */
 grunt.renameTask( 'watch', 'delta' );
-grunt.registerTask( 'watch', [ 'default', 'delta' ] );
+
+/**
+ * When watch is called first it executes default task which is just an alias for a build task
+ * then delta task is fired - this task waits for files changes and fires some tasks accordingly
+ */
+grunt.registerTask( 'watch', [ 'default', 'delta' ] ); 
 
 /**
 * The default task is to build.

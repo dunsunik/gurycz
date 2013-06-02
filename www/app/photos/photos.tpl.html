@@ -7,11 +7,18 @@
 	</div>
 </script>
 
-<div modal-events></div>
 
-<div modal="modalIsVisible" close="closePhoto()" options="modalOpts" >
-	<div>
-		<img ng-src="{{actPhoto().image.url | imgSrcFilter}}" width="{{actPhoto().image.w}}" height="{{actPhoto().image.h}}" ah-swipeleft="prevPhoto()" ah-swiperight="nextPhoto()" ah-swipeleft-options="{swipe_velocity: 0.1}" image-loaded="maximizePopup" />
+<!-- MODAL DIALOG -->
+<div simple-modal="modal.isVisible" id="simple-modal" class="modal fade dynamic-modal" 
+show="modalShow()" shown="modalShown()" hide="modalHide()" hidden="modalHidden()"
+tabindex="-1" role="dialog" close="closePhoto()" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" aria-hidden="true"
+global-keydown="{8: 'prevPhoto()', 37: 'prevPhoto()', 32: 'nextPhoto()', 39: 'nextPhoto()', 13: 'toggleFsMode()', 72: 'toggleExifInfo()', 73: 'toggleExifInfo()', 27: 'closePhoto()'}" global-keydown-enabled="modal.isVisible" 
+toggle-fs-mode="fsModeEnabled">
+	<div class="dynamic-modal-body">
+		<img ng-src="{{actPhoto().image.url | imgSrcFilter}}" width="{{actPhoto().image.w}}" height="{{actPhoto().image.h}}" 
+		ah-swipeleft="prevPhoto()" ah-swiperight="nextPhoto()" ah-swipeleft-options="{swipe_velocity: 0.1}" 
+		image-loaded="maximizePopup"
+		window-resized="maximizePopup" window-resized-enabled="modal.isVisible" ng-click="toggleModalFooter()"/>
 	</div>
 
 	<div ng-show="exifInfoEnabled">
@@ -25,26 +32,23 @@
 		</ul>
 	</div>
 
-	<div class="modal-footer">
-		<div class="pull-left">{{actPhoto().title}}</div>
-		<button class="btn btn-warning cancel" ng-click="prevPhoto()">Prev</button>
-		<button class="btn btn-warning cancel" ng-click="nextPhoto()">Next</button>
-		<button class="btn btn-warning cancel" ng-click="closePhoto()">X</button>
+	<div ng-class="{'dynamic-modal-footer': true, 'display-no': modal.footerIsVisible}">
+		<div class="pull-left title">{{actPhoto().descr | shortenFilter:25}}</div>
+		<button class="btn btn-warning cancel" ng-click="toggleExifInfo()"><i class="icon-question-sign"></i></button>
+		<button class="btn btn-warning cancel" ng-click="toggleFsMode()"><i class="icon-fullscreen"></i></button>
+		<button class="btn btn-warning cancel" ng-click="prevPhoto()"><i class="icon-backward"></i></button>
+		<button class="btn btn-warning cancel" ng-click="nextPhoto()"><i class="icon-forward"></i></button>
+		<button class="btn btn-warning cancel" ng-click="closePhoto()" class="close" data-dismiss="modal" type="button"><i class="icon-remove"></i></button>
 	</div>
 </div>
-
-<div 
-global-keydown="{8: 'prevPhoto()', 37: 'prevPhoto()', 32: 'nextPhoto()', 39: 'nextPhoto()', 13: 'toggleFsMode()', 73: 'toggleExifInfo()'}" global-keydown-enabled="modalIsVisible"
-toggle-fs-mode="fsModeEnabled"
-></div>
-
+<!-- END MODAL DIALOG -->
 
 <!-- Photos -->
 <section id="photos" class="box">
 	<div class="row-fluid">
 		<div class="span12 header first-header">
 			<hgroup>
-				<a href="" ng-click="goBack()" class="goback">JDI ZPĚT</a>
+				<a href="" ng-click="goBack()" class="goback">&lt;&lt; zpět</a>
 				<h2>Fotky</h2>
 				<h3>Náhledy vyfocených fotografií</h3>
 			</hgroup>
@@ -55,7 +59,12 @@ toggle-fs-mode="fsModeEnabled"
 		<div class="span12 content">
 				<ul class="thumbnails thumbnails-list">
 					<li class="span3 row-fluid thumbnail" ng-repeat="item in photosData.items">
-						<picasa-photo data="item" index="$index" include="photo-block.html" show-photo-bridge="openPhoto(index)" />
+						<div class="pull-center shadow">
+							<a ng-click="openPhoto($index)">
+								<img class="" ng-src="{{item.thumb.url}}" alt="" />
+								<h2>{{item.descr | shortenFilter:20}}</h2>
+							</a>
+						</div>
 					</li>
 				</ul>
 
