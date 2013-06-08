@@ -14,23 +14,15 @@
 		<div class="span12 content">
 			<section class="portfolio-ctgs" >
 				<div ng-repeat="year in years">
-					<h2>{{year.year}}</h2>
+					<h2 class="year">{{year.year}}</h2>
 
-					<div class="span12 row-fluid one-album-row" ng-repeat="item in year.items">
-						<div class="span6 image">
-							<div class="pull-center thumbnail shadow">
-								<a ng-href="/#/photos/albumid/{{item.id}}">
-									<img ng-src="{{item.image.url}}" alt="" />
-								</a>
-							</div>
-						</div>
-						<div class="span6 description">
-							<a ng-href="/#/photos/albumid/{{data.id}}">
-								<h2>{{item.title | shortenFilter:30}}</h2>
-								<h3>{{item.dateFormated}}</h3>
-								<p>{{item.descr | shortenFilter:500}}</p>
-							</a>
-						</div>
+					<div class="row-fluid one-album-row" ng-repeat="item in year.items">
+						<a ng-href="/#/photos/albumid/{{item.id}}" class="thumbnail">
+							<img ng-src="{{item.image.url}}" alt="" class="shadow" />
+							<h2>{{item.title | shortenFilter:30}}</h2>
+							<h3>{{item.dateFormated}}</h3>
+							<p>{{item.descr}}</p>
+						</a>
 					</div>
 
 				</div>

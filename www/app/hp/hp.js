@@ -34,22 +34,10 @@ angular.module( 'gury.hp', [
 .controller( 'HpCtrl', [ '$scope', '$rootScope', 'titleService', 'picasaService', 'cache', function HpController( $scope, $rootScope, titleService, picasaService, cache ) {
 	titleService.setTitle( 'Home' );
 
-	var albumsDataReady = function(data) {
-		$rootScope.albums = data;
-	};
-
-	// get all albums and put them into a cache
-	var albums = cache.get('albums');
-
-	if(!albums) {
-		var promise = picasaService.getAlbums({'max-results': 4 }).then(function(data) {
-			cache.put('albums', data);
-			albumsDataReady(data);
-		});
-	}
-	else {
-		albumsDataReady(albums);
-	}
+	// get albums
+	picasaService.getAlbumsCached($rootScope.albumOpts).then(function(albums) {
+		$rootScope.albums = albums;
+	});
 
 /*		
 	$.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",
@@ -60,12 +48,10 @@ angular.module( 'gury.hp', [
 		format: "json" 
 		},
 		function(data) {
-			console.log(data);
 			var images = [];
 			angular.forEach(data.items, function(item) {
 				images.push({ src: item.media.m.replace('_m\\.jpg', '_b.jpg'), fade: 1500});
 			});
-			console.log(images);
 
 			// init vegas backgrounds
 			$.vegas('slideshow', {

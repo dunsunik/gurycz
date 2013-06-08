@@ -56,6 +56,13 @@ angular.module( 'gury.photos', [
 
 	$scope.exifInfoEnabled = false;
 
+	// when location change on this controller fire this
+	// for global listening it should be $rootScope.$on....
+	// it does nothing since it's just an example
+	$scope.$on('$locationChangeSuccess', function() {
+		//	$rootScope.actualLocation = $location.path();
+	});   
+
 	$scope.modal = {
 		isVisible : false
 	};
@@ -100,8 +107,10 @@ angular.module( 'gury.photos', [
 
 	// move onto a next photo and get it's data
 	$scope.nextPhoto = function() {
+
 		// is last photo but has more pages -> fetch another photos
 		if($scope.isLastPhotoButHasMorePages()) {
+			Working.set('picasaWorking');
 			var promise = $scope.getNextItems($scope.photosData, $q.defer());
 			promise.then(function(data) {
 				$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
@@ -109,15 +118,31 @@ angular.module( 'gury.photos', [
 		}
 		// has more photos -> go to next photo
 		else if($scope.hasMorePhotos()) {
+			Working.set('picasaWorking');
 			$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
 
 		}
+		// there are no more photos
+		else {
+			Working.unset('picasaWorking');
+		}
+
 		return $scope.actPhoto();
 	};
 
 	// move onto a previous photo and get it's data
 	$scope.prevPhoto = function() {
-		$scope.actPhotoIndex = $scope.actPhotoIndex <= 0 ? 0 :  $scope.actPhotoIndex - 1;
+		// we are already on a first image
+		if($scope.actPhotoIndex <= 0) {
+			$scope.actPhotoIndex = 0;
+		}
+		// go to on a previous image
+		else {
+			Working.set('picasaWorking');
+			$scope.actPhotoIndex = $scope.actPhotoIndex - 1;
+		}
+
+		
 		return $scope.actPhoto();
 	};
 
@@ -224,6 +249,10 @@ angular.module( 'gury.photos', [
 	// is called either from imageLoaded directive after an image is fully loaded
 	// or from windowResized directive when dimensions of a window browser have changed
 	$scope.maximizePopup = function(imgElm, imgW, imgH) {
+
+		// disable working
+		Working.unset('picasaWorking');
+
 		if(imgW) {
 			$scope.actPhoto().image.w = imgW;
 		}
@@ -241,6 +270,7 @@ angular.module( 'gury.photos', [
 
 		picasaService.tuneExifData($scope.actPhoto());
 		picasaService.maximizeAndCenter( imgElm, $('#simple-modal'), imgW, imgH);
+
 	};
 
 	$scope.toggleModalFooter = function() {

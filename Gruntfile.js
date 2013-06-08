@@ -399,7 +399,7 @@ ngmin : {
 rsync: {
 	deploy: {
 		src: 'dist/',
-		dest: '/home/dunsun/public_html',
+		dest: '/home/dunsun/public_html/gury',
 		host: 'proxy',
 		recursive: true,
 		syncDest: false

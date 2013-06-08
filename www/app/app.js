@@ -17,7 +17,7 @@ config( function myAppConfig ( $routeProvider ) {
 
 run([ 'titleService', '$rootScope', 'picasaService', 'Working', 'cache', '$filter', '$q', function run ( titleService, $rootScope, picasaService, Working, cache, $filter, $q ) {
 	// set default picasa opts
-	picasaService.setOpts({user: 'dunsun', imagesize: 1600 });
+	picasaService.setOpts({user: 'gury.cz', imagesize: 1600 });
 
 	titleService.setSuffix( ' | gury' );
 
@@ -37,7 +37,7 @@ run([ 'titleService', '$rootScope', 'picasaService', 'Working', 'cache', '$filte
 		Working.unset('picasaWorking');
 	};
 
-	$rootScope.albumOpts = {'max-results': 30, imagesize: 288};
+	$rootScope.albumOpts = {'max-results': 30, imgmax: 320};
 }]).
 
 // controller

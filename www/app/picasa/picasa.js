@@ -90,8 +90,19 @@ return {
 
 		$(elm).load(function() {
 			var dim = getNaturalDimension($(elm));
-			// fire an action and pass some params into it
-			fn(scope)(elm, dim.w, dim.h);
+			
+			// if fn is a sync method
+			if($rootScope.$$phase) {
+				// fire an action and pass some params into it
+				fn(scope)(elm, dim.w, dim.h);
+			}
+			// if fn is an async method
+			else {
+				scope.$apply(function() {
+					// fire an action and pass some params into it
+					fn(scope)(elm, dim.w, dim.h);
+				});
+			}
 		});
 	}
 };
@@ -175,6 +186,14 @@ return {
 				$('body').css('overflow', 'auto');
 				$(elm).modal('hide');
 			}
+		});
+
+		// when user clicks on a back history button modal overlay still covers the browser
+		// so we need to remove it manualy
+		scope.$on('$destroy', function() {
+			$('body').css('overflow', 'auto');
+			$(elm).modal('hide');
+			$('.modal-backdrop').remove();
 		});
 	}
 };
@@ -362,7 +381,7 @@ return {
 		// 32, 48, 64, 72, 104, 144, 150, 160
 		thumbsize: 160,
 		// 94, 110, 128, 200, 220, 288, 320, 400, 512, 576, 640, 720, 800, 912, 1024, 1152, 1280, 1440, 1600
-		imagesize: 720,
+		imgmax: 720,
 		// path to image placeholder (e.g. images/loader.gif).
 		loader: '',
 		// maximum number of photos to return (0 indicates all).
@@ -410,7 +429,7 @@ return {
 				'tag': undefined,
 				'max-results': opts['max-results'],
 				'thumbsize': opts.thumbsize + "c",
-				'imgmax': opts.imagesize,
+				'imgmax': opts.imgmax,
 				'alt': 'jsonc',
 				'access': 'visible',
 				'callback': 'JSON_CALLBACK'
@@ -458,6 +477,7 @@ return {
 			return this.prepare({
 				'user': params.user,
 				'max-results': params['max-results'],
+				'imgmax': params.imgmax,
 				'kind': 'album'
 			});
 		},
@@ -501,6 +521,9 @@ return {
 
 	// returns promise
 	getAlbumsCached: function(params) {
+		params.picasaWorking = params && params.picasaWorking ? params.picasaWorking : 'picasaWorking';
+		picasaWorking(params.picasaWorking, true);
+
 		// try to get albums from a cache
 		var albums = cache.get('albums');
 
@@ -511,10 +534,12 @@ return {
 			var promise = this.getAlbums(params).then(function(data) {
 				albums = $filter('picasaExcludeSystemAlbums')(data);
 				cache.put('albums', albums);
+				picasaWorking(params.picasaWorking, false);
 				d.resolve(albums);
 			});
 		}
 		else {
+			picasaWorking(params.picasaWorking, false);
 			d.resolve(albums);
 		}
 

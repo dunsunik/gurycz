@@ -1,50 +1,66 @@
 #albums {
+
+	h2.year {
+		margin: 0px;
+		padding: 0px;
+	}
+
 	.one-album-row {
 
-		padding: 20px 0px;
+		padding: 20px 10px 0px 0px;
 		
-		.image {	
-			.thumbnail {
-				border: 0px solid #fff;
-				max-width: 288px;
-				height: auto;
-				border: 1px solid #444;
-				border-radius: 0px;
+		.thumbnail {
+			width: 100%;
+			height: auto;
+			border: 0px solid #444;
+			border-radius: 0px;
+			float: left;
+			padding: 0px 0px 15px 15px;
+			margin: 0px 0px 10px 0px;
 
-				img {
-					opacity:1;
-					&:hover{
-						opacity:.85;
-					}
+			-webkit-box-shadow: none;
+			-moz-box-shadow: none;
+			box-shadow: none;
+
+			img {
+				float: left;
+				border: 1px solid #444;
+				padding: 3px 3px 3px 3px;
+				margin: 0px 32px 10px 0px;
+				opacity:1;
+				&:hover{
+					opacity:.85;
 				}
 			}
-		}
 
-		.description {
-			padding: 5px 10px 5px 5px;
 			h2 {
-				margin: 9px 0px 0px 0px;
+				margin: 0px 0px 0px 0px;
+				padding: 0px;
 				color: @TitleColorDark;
 				font-size: 28px;
 				line-height: 32px;
 				text-align: left;
+				display: block;
 			}
 
 			h3 {
 				margin-top: 17px;
+				margin-bottom: 15px;
 				color: #000;
 				font-size: 16px;
 				line-height: 16px;
 				text-align: left;
+				display: block;
 			}
 
 			p {
-				margin-top: 15px;
+				padding: 0px;
+				margin: 0px;
 				font-size: 16px;
 				line-height: 22px;
 				color: #000;
-				display: block;
 				text-align: left;
+				display: block;
 			}
 		}
 	}
@@ -54,10 +70,14 @@
 /* Landscape phones and down */
 @media (max-width: 767px)
 {
-	#albums .one-album-row .description {
+	#albums .one-album-row {
 		max-width: 288px !important;
 		margin: 0 auto !important;
 		float: none !important;
 		text-align: center !important;
+
+		h2 {
+			clear: both;
+		}
 	}
 }
