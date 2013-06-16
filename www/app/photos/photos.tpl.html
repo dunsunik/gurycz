@@ -19,6 +19,9 @@ toggle-fs-mode="fsModeEnabled">
 		ah-swipeleft="prevPhoto()" ah-swiperight="nextPhoto()" ah-swiperight-options="{prevent_default: true}" ah-swipeleft-options="{prevent_default: true}" 
 		image-loaded="maximizePopup"
 		window-resized="maximizePopup" window-resized-enabled="modal.isVisible" ng-click="toggleModalFooter()"/>
+		<div ng-class="{'dynamic-modal-footer': true, 'display-no': modal.footerIsVisible}">
+			<div class="pull-left title" ng-bind-html-unsafe="actPhoto().descr | addNbspPaddingFilter:2"></div>
+		</div>
 	</div>
 
 	<div ng-show="exifInfoEnabled">
@@ -32,13 +35,18 @@ toggle-fs-mode="fsModeEnabled">
 		</ul>
 	</div>
 
-	<div ng-class="{'dynamic-modal-footer': true, 'display-no': modal.footerIsVisible}">
-		<div class="pull-left title">{{actPhoto().descr | shortenFilter:40}}</div>
-		<button class="btn btn-warning cancel" ng-click="toggleExifInfo()"><i class="icon-question-sign"></i></button>
-		<button class="btn btn-warning cancel" ng-click="toggleFsMode()"><i class="icon-fullscreen"></i></button>
-		<button class="btn btn-warning cancel" ng-click="prevPhoto()"><i class="icon-backward"></i></button>
-		<button class="btn btn-warning cancel" ng-click="nextPhoto()"><i class="icon-forward"></i></button>
-		<button class="btn btn-warning cancel" ng-click="closePhoto()" class="close" data-dismiss="modal" type="button"><i class="icon-remove"></i></button>
+	<div ng-class="{'dynamic-modal-left': true, 'display-no': modal.footerIsVisible}">
+		<button class="btn btn-link top transparent" ng-click="toggleFsMode()"><i class="icon-fullscreen icon-white"></i></button>
+		<div class="middleLayer" ng-click="prevPhoto()">
+			<button class="btn btn-link middle transparent" ng-click="prevPhoto()"><i class="icon-backward icon-white"></i></button>
+		</div>
+		<button class="btn btn-link bottom transparent" ng-click="toggleExifInfo()"><i class="icon-question-sign icon-white"></i></button>
+	</div>
+	<div ng-class="{'dynamic-modal-right': true, 'display-no': modal.footerIsVisible}">
+		<button class="btn btn-link top transparent" ng-click="closePhoto()" class="close" data-dismiss="modal" type="button"><i class="icon-remove icon-white"></i></button>
+		<div class="middleLayer" ng-click="nextPhoto()">
+			<button class="btn btn-link middle transparent" ng-click="nextPhoto()"><i class="icon-forward icon-white"></i></button>
+		</div>
 	</div>
 </div>
 <!-- END MODAL DIALOG -->

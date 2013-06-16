@@ -624,7 +624,7 @@ return {
 		if(imgW && imgH || 1==1) {
 			imgW = parseInt(imgW, 10);
 			imgH = parseInt(imgH, 10);
-			var footerHeight = 20;
+			var footerHeight = 8;
 
 			var imgScale = imgW / imgH;
 
@@ -671,7 +671,7 @@ return {
 			if(elmForCentering) {
 				$(elmForCentering).css('margin-left', '0');
 				$(elmForCentering).css('left', Math.floor((docW - imgW) / 2));
-				$(elmForCentering).css('top', (Math.floor((docH - imgH) / 2) + 5 ));
+				$(elmForCentering).css('top', Math.floor((docH - imgH) / 2));
 			}
 		}
 	},
@@ -744,6 +744,21 @@ return {
 	return function(input, maxChars) {
 		if(input && input.length > maxChars) {
 			input = input.slice(0, maxChars) + '...';
+		}
+		return input;
+	};
+}])
+
+// input = data  (hash responded from a google which byt the way contains array of items (photos))
+// type = 'photo', 'album'
+.filter('addNbspPaddingFilter', ['$filter', function($filter) {
+	return function(input, count) {
+		if(input && count > 0) {
+			var nbsp = '';
+			for(var i = 0;  i<count; i++) {
+				nbsp = nbsp + '&nbsp;';
+			}
+			input = nbsp + input + nbsp;
 		}
 		return input;
 	};

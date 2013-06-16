@@ -17,7 +17,7 @@ config( function myAppConfig ( $routeProvider ) {
 
 run([ 'titleService', '$rootScope', 'picasaService', 'Working', 'cache', '$filter', '$q', function run ( titleService, $rootScope, picasaService, Working, cache, $filter, $q ) {
 	// set default picasa opts
-	picasaService.setOpts({user: 'gury.cz', imagesize: 1600 });
+	picasaService.setOpts({user: 'gury.cz', imgmax: 1600 });
 
 	titleService.setSuffix( ' | gury' );
 
