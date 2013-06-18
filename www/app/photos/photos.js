@@ -52,10 +52,6 @@ angular.module( 'gury.photos', [
 
 	$scope.photosData = undefined;
 
-	$scope.fsModeEnabled = false;
-
-	$scope.exifInfoEnabled = false;
-
 	// when location change on this controller fire this
 	// for global listening it should be $rootScope.$on....
 	// it does nothing since it's just an example
@@ -63,8 +59,13 @@ angular.module( 'gury.photos', [
 		//	$rootScope.actualLocation = $location.path();
 	});   
 
+	// modal settings parameters
 	$scope.modal = {
-		isVisible : false
+		fsModeEnabled: false,
+		exifInfoEnabled: false,
+		isVisible: false,
+		buttonsAreVisible: true,
+		titleIsVisible: true
 	};
 
 	// show photos for a specified tag
@@ -234,16 +235,16 @@ angular.module( 'gury.photos', [
 
 	$scope.toggleExifInfo = function() {
 		// will become enabled -> regenerate and tidy exif data
-		if(!$scope.exifInfoEnabled) {
+		if(!$scope.modal.exifInfoEnabled) {
 			picasaService.tuneExifData($scope.actPhoto());
 		}
 
-		$scope.exifInfoEnabled = $scope.exifInfoEnabled ? false : true;
+		$scope.modal.exifInfoEnabled = $scope.modal.exifInfoEnabled ? false : true;
 	};
 
 	// toogle fullscreen mode
 	$scope.toggleFsMode = function() {
-		$scope.fsModeEnabled = $scope.fsModeEnabled ? false : true;
+		$scope.modal.fsModeEnabled = $scope.modal.fsModeEnabled ? false : true;
 	};
 
 	// is called either from imageLoaded directive after an image is fully loaded
@@ -273,10 +274,17 @@ angular.module( 'gury.photos', [
 
 	};
 
-	$scope.toggleModalFooter = function() {
-		$scope.modal.footerIsVisible = $scope.modal.footerIsVisible ? false : true;
+	// toggles between title visible, buttons visible, nothing visible
+	$scope.toggleVerbosity = function() {
+		if($scope.modal.buttonsAreVisible) {
+			$scope.modal.buttonsAreVisible = false;
+			$scope.modal.titleIsVisible = false;
+		}
+		else {
+			$scope.modal.buttonsAreVisible = true;
+			$scope.modal.titleIsVisible = true;
+		}
 	};
-
 
 	$scope.$watch('actPhoto()', function(newVal) {
 		if(newVal) {

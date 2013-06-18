@@ -12,19 +12,19 @@
 <div simple-modal="modal.isVisible" id="simple-modal" class="modal fade dynamic-modal" 
 show="modalShow()" shown="modalShown()" hide="modalHide()" hidden="modalHidden()"
 tabindex="-1" role="dialog" close="closePhoto()" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" aria-hidden="true"
-global-keydown="{8: 'prevPhoto()', 37: 'prevPhoto()', 32: 'nextPhoto()', 39: 'nextPhoto()', 13: 'toggleFsMode()', 72: 'toggleExifInfo()', 73: 'toggleExifInfo()', 27: 'closePhoto()'}" global-keydown-enabled="modal.isVisible" 
-toggle-fs-mode="fsModeEnabled">
+global-keydown="{8: 'prevPhoto()', 37: 'prevPhoto()', 32: 'nextPhoto()', 39: 'nextPhoto()', 13: 'toggleFsMode()', 72: 'toggleExifInfo()', 73: 'toggleExifInfo()', 27: 'closePhoto()', 86: 'toggleVerbosity()' }" global-keydown-enabled="modal.isVisible" 
+toggle-fs-mode="modal.fsModeEnabled">
 	<div class="dynamic-modal-body">
 		<img ng-src="{{actPhoto().image.url | imgSrcFilter}}" width="{{actPhoto().image.w}}" height="{{actPhoto().image.h}}" 
 		ah-swipeleft="prevPhoto()" ah-swiperight="nextPhoto()" ah-swiperight-options="{prevent_default: true}" ah-swipeleft-options="{prevent_default: true}" 
 		image-loaded="maximizePopup"
-		window-resized="maximizePopup" window-resized-enabled="modal.isVisible" ng-click="toggleModalFooter()"/>
-		<div ng-class="{'dynamic-modal-footer': true, 'display-no': modal.footerIsVisible}">
+		window-resized="maximizePopup" window-resized-enabled="modal.isVisible" ng-click="toggleVerbosity()"/>
+		<div ng-class="{'dynamic-modal-footer': true, 'display-no': (!modal.titleIsVisible)}">
 			<div class="pull-left title" ng-bind-html-unsafe="actPhoto().descr | addNbspPaddingFilter:2"></div>
 		</div>
 	</div>
 
-	<div ng-show="exifInfoEnabled">
+	<div ng-show="modal.exifInfoEnabled">
 		<ul class="exif">
 			<li ng-repeat="entry in actPhoto().exifTuned">
 				<div ng-repeat="(key, val) in entry">
@@ -35,18 +35,22 @@ toggle-fs-mode="fsModeEnabled">
 		</ul>
 	</div>
 
-	<div ng-class="{'dynamic-modal-left': true, 'display-no': modal.footerIsVisible}">
-		<button class="btn btn-link top transparent" ng-click="toggleFsMode()"><i class="icon-fullscreen icon-white"></i></button>
+	<div ng-class="{'dynamic-modal-left': true, 'display-no': (!modal.buttonsAreVisible)}">
+		<button class="btn btn-link top transparent" ng-click="toggleFsMode()" title="Celoobrazovkový režim - klávesa Enter"><i class="icon-fullscreen icon-white"></i></button>
 		<div class="middleLayer" ng-click="prevPhoto()">
-			<button class="btn btn-link middle transparent" ng-click="prevPhoto()"><i class="icon-backward icon-white"></i></button>
+			<button class="btn btn-link middle transparent" ng-click="prevPhoto()" title="Předchozí fotka - klávesa šipka do leva"><i class="icon-backward icon-white"></i></button>
 		</div>
-		<button class="btn btn-link bottom transparent" ng-click="toggleExifInfo()"><i class="icon-question-sign icon-white"></i></button>
+		<button class="btn btn-link bottom transparent" ng-click="toggleExifInfo()" title="Zobrazí/Skryje EXIF informace - klávesa i"><i class="icon-question-sign icon-white"></i></button>
 	</div>
-	<div ng-class="{'dynamic-modal-right': true, 'display-no': modal.footerIsVisible}">
-		<button class="btn btn-link top transparent" ng-click="closePhoto()" class="close" data-dismiss="modal" type="button"><i class="icon-remove icon-white"></i></button>
+	<div ng-class="{'dynamic-modal-right': true, 'display-no': (!modal.buttonsAreVisible)}">
+		<button class="btn btn-link top transparent" ng-click="closePhoto()" class="close" data-dismiss="modal" type="button" title="Zavře okno prohlížení fotek - klávesa Esc"><i class="icon-remove icon-white"></i></button>
 		<div class="middleLayer" ng-click="nextPhoto()">
-			<button class="btn btn-link middle transparent" ng-click="nextPhoto()"><i class="icon-forward icon-white"></i></button>
+			<button class="btn btn-link middle transparent" ng-click="nextPhoto()" title="Další fotka - klávesa šipka do prava nebo mezerník"><i class="icon-forward icon-white"></i></button>
 		</div>
+		<button class="btn btn-link bottom transparent" ng-click="toggleVerbosity()" title="Zobrazí/skryje tlačítka a popisek fotky"><i class="icon-align-center icon-white"></i></button>
+	</div>
+	<div ng-class="{'dynamic-modal-right': true, 'dynamic-modal-right-corner': true, 'display-no': modal.buttonsAreVisible}">
+		<button class="btn btn-link bottom transparent" ng-click="toggleVerbosity()" title="Zobrazí/skryje tlačítka a popisek fotky - klávesa v"><i class="icon-align-center icon-white"></i></button>
 	</div>
 </div>
 <!-- END MODAL DIALOG -->
