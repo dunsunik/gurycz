@@ -1,0 +1,15 @@
+gurycz
+
+git pull origin master
+grunt clean
+grunt watch
+zastavit nginx, pustit apache
+http://gury.local/
+git push origin master
+
+uziv.jmeno do githubu je dunsun@gmail.com
+heslo mam v gmailu
+
+git deploy
+musim vypnout openvpn a zapnout jinout vpnku
+heslo klasicke jak na proxynu do serifova :)
