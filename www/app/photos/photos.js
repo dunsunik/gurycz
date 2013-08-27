@@ -108,14 +108,15 @@ angular.module( 'gury.photos', [
 
 	// move onto a next photo and get it's data
 	$scope.nextPhoto = function() {
-
 		// is last photo but has more pages -> fetch another photos
 		if($scope.isLastPhotoButHasMorePages()) {
-			Working.set('picasaWorking');
-			var promise = $scope.getNextItems($scope.photosData, $q.defer());
-			promise.then(function(data) {
-				$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
-			});
+			if(!Working.isWorking('picasaWorking')) {
+				Working.set('picasaWorking');
+				var promise = $scope.getNextItems($scope.photosData, $q.defer());
+				promise.then(function(data) {
+					$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
+				});
+			}
 		}
 		// has more photos -> go to next photo
 		else if($scope.hasMorePhotos()) {
@@ -162,30 +163,35 @@ angular.module( 'gury.photos', [
 
 	// will fetch next items (photos) from google
 	$scope.getNextItems = function(data, defer) {
-		if(data && data.nextLink) {
-			picasaService.getPhotos({ nextLink: data.nextLink, picasaWorking: 'picasaWorking' }).then(function(data) {
-				// if there are some photos already append newly responded photos to it
-				if(photos().length > 0) {
-					angular.forEach(data.items, function(item) {
-						photos().push(item);
-					});
-				}
-				// there are no photos on a screen yet
-				else {
-					$scope.photosData = data;
-				}
+		if(!Working.isWorking('getNextItems')) {
+			if(data && data.nextLink) {
+				picasaService.getPhotos({ nextLink: data.nextLink, picasaWorking: 'picasaWorking' }).then(function(data) {
+					// if there are some photos already append newly responded photos to it
+					if(photos().length > 0) {
+						angular.forEach(data.items, function(item) {
+							photos().push(item);
+						});
+					}
+					// there are no photos on a screen yet
+					else {
+						$scope.photosData = data;
+					}
 
-				$scope.photosData.nextLink = data.nextLink;
+					$scope.photosData.nextLink = data.nextLink;
 
-				if(defer) {
-					defer.resolve($scope.photosData);
-				}
-			}, function() {
-				defer.reject('Next photos could not be loaded');
-			});
-		}
-		if(defer) {
-			return defer.promise;
+					Working.unset('getNextItems');
+
+					if(defer) {
+						defer.resolve($scope.photosData);
+					}
+				}, function() {
+					Working.unset('getNextItems');
+					defer.reject('Next photos could not be loaded');
+				});
+			}
+			if(defer) {
+				return defer.promise;
+			}
 		}
 	};
 
