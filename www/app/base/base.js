@@ -475,6 +475,10 @@ factory('Working', ['$rootScope', function($rootScope) {
 	return self;
 }]).
 
+filter('encodeUri', ['$window', function ($window) {
+	return $window.encodeURIComponent;
+}]).
+
 // Cache
 factory('cache', ['$cacheFactory', function($cacheFactory) {
 	var cache = $cacheFactory('myCache');

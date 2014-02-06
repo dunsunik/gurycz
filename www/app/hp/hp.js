@@ -31,13 +31,19 @@ angular.module( 'gury.hp', [
 /**
  * And of course we define a controller for our route.
  */
-.controller( 'HpCtrl', [ '$scope', '$rootScope', 'titleService', 'picasaService', 'cache', function HpController( $scope, $rootScope, titleService, picasaService, cache ) {
+.controller( 'HpCtrl', [ '$scope', '$rootScope', 'titleService', 'cache', 'flickrService', function HpController( $scope, $rootScope, titleService, cache, flickrService) {
 	titleService.setTitle( 'Home' );
 
+	$scope.test = function() {
+		flickrService.getAlbums();
+	};
+
+	/*
 	// get albums
-	picasaService.getAlbumsCached($rootScope.albumOpts).then(function(albums) {
+	flickrService.getAlbumsCached().then(function(albums) {
 		$rootScope.albums = albums;
 	});
+	*/
 
 /*		
 	$.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",

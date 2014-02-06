@@ -31,7 +31,7 @@ angular.module( 'gury.portfolio', [
 /**
  * And of course we define a controller for our route.
  */
-.controller( 'PortfolioCtg', [ '$scope', '$rootScope', 'titleService', 'picasaService', 'cache', function HpController( $scope, $rootScope, titleService, picasaService, cache ) {
+.controller( 'PortfolioCtg', [ '$scope', '$rootScope', 'titleService', 'flickrService', 'cache', function HpController( $scope, $rootScope, titleService, flickrService, cache ) {
 	titleService.setTitle( 'Home' );
 
 	// enquire - media queries - replace images
@@ -50,7 +50,7 @@ angular.module( 'gury.portfolio', [
 	$(window.document).off( "scroll");
 
 	// get albums and put them into a cache
-	picasaService.getAlbumsCached($rootScope.albumOpts).then(function(albums) {
+	flickrService.getAlbumsCached($rootScope.albumOpts).then(function(albums) {
 	});
 
 	/*

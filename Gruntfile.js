@@ -80,6 +80,7 @@ meta: {
 */
 src: {
 	jsLibs:	[	
+			'<%= srcdir %>/assets/gury.base.js',
 			'<%= vendordir %>/twitter-bootstrap/docs/assets/js/holder/holder.js',
 			'<%= componentsdir %>/jquery/jquery-migrate.min.js',
 			'<%= componentsdir %>/es5-shim/es5-shim.min.js',
@@ -134,9 +135,26 @@ copy: {
 		dest: '<%= distdir %>/assets/',
 		cwd: '<%= vendordir %>/twitter-bootstrap/docs/assets/js/holder',
 		expand: true
+	},
+	{ 
+		src: [ '**' ],
+		dest: '<%= distdir %>/serverside/',
+		cwd: '<%= srcdir %>/serverside',
+		expand: true
 	}
 	]   
+	},
+	cachephp: {
+		files: [
+				{ 
+				src: [ 'cache.php','clean_and_precache.php' ],
+				dest: '<%= distdir %>/serverside/',
+				cwd: '<%= srcdir %>/serverside',
+				expand: true
+				}
+		]
 	}
+
 },
 
 /**
@@ -175,7 +193,7 @@ concat: {
 	* `libs.js` file. These will not be uglified (minified)
 	*/
 	libs: {
-		src: [ 'module.prefix', '<%= src.jsLibs %>', 'module.suffix' ],
+		src: [ '<%= src.jsLibs %>' ],
 
 		dest: '<%= distdir %>/assets/libs.js'
 	}
@@ -345,6 +363,14 @@ delta: {
 			'<%= srcdir %>/assets/**/*'
 		],
 		tasks: [ 'copy' ]
+	},
+
+	cachephp: {
+		files: [ 
+			'<%= srcdir %>/serverside/cache.php',
+			'<%= srcdir %>/serverside/clean_and_precache.php'
+		],
+		tasks: [ 'copy:cachephp' ]
 	},
 
 	/**

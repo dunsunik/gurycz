@@ -3,6 +3,8 @@ angular.module( 'gury', [
 	'app-templates',
 	'component-templates',
 	'gury.base',
+	'gury.photosBase',
+	'gury.flickr',
 	'gury.picasa',
 	'gury.hp',
 	'gury.portfolio',
@@ -15,29 +17,36 @@ config( function myAppConfig ( $routeProvider ) {
 	$routeProvider.otherwise({ redirectTo: '/hp' });
 }).
 
-run([ 'titleService', '$rootScope', 'picasaService', 'Working', 'cache', '$filter', '$q', function run ( titleService, $rootScope, picasaService, Working, cache, $filter, $q ) {
-	// set default picasa opts
-	picasaService.setOpts({user: 'gury.cz', imgmax: 1600 });
+run([ 'titleService', '$rootScope', 'picasaService', 'flickrService', 'Working', 'cache', '$filter', '$q', function run ( titleService, $rootScope, picasaService, flickrService, Working, cache, $filter, $q ) {
+	// set flickr settings
+	flickrService.setOpts({
+		api_key: 'acc0d15f07c3f8cb5838d583971cc3e5',
+		user_id: '30314549@N02',
+		thumbSize: 'q',
+		fullSize: 'o',
+		albumSize: 'm',
+		albumPerPage: 100
+	});
+
+	// picasaService.setOpts({user: 'gury.cz', imgmax: 1600 });
 
 	titleService.setSuffix( ' | gury' );
 
 	$rootScope.isWorking = function() {
-		return Working.isWorking('picasaWorking') ? true : false;
+		return Working.isWorking('fetchingPhotosWorking') ? true : false;
 	};
 
 	$rootScope.resetAllLoadings = function() {
-		Working.unset('picasaWorking');
+		Working.unset('fetchingPhotosWorking');
 	};
 
 	$rootScope.showWorking = function() {
-		Working.set('picasaWorking');
+		Working.set('fetchingPhotosWorking');
 	};
 
 	$rootScope.hideWorking = function() {
-		Working.unset('picasaWorking');
+		Working.unset('fetchingPhotosWorking');
 	};
-
-	$rootScope.albumOpts = {'max-results': 30, imgmax: 320};
 }]).
 
 // controller

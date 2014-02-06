@@ -20,7 +20,7 @@ toggle-fs-mode="modal.fsModeEnabled">
 		image-loaded="maximizePopup"
 		window-resized="maximizePopup" window-resized-enabled="modal.isVisible" ng-click="toggleVerbosity()"/>
 		<div ng-class="{'dynamic-modal-footer': true, 'display-no': (!modal.titleIsVisible)}">
-			<div class="pull-left title" ng-bind-html-unsafe="actPhoto().descr | addNbspPaddingFilter:2"></div>
+			<div class="pull-left title" ng-bind-html-unsafe="actPhoto().title | addNbspPaddingFilter:2"></div>
 		</div>
 	</div>
 

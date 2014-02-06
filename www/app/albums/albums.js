@@ -17,15 +17,15 @@ angular.module( 'gury.albums', [
 /**
  * And of course we define a controller for our route.
  */
-.controller( 'AlbumsCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'cache', '$rootScope', '$filter', function PhotosController( $scope, titleService, picasaService, $routeParams, cache, $rootScope, $filter ) {
+.controller( 'AlbumsCtrl', [ '$scope', 'titleService', 'flickrService', '$routeParams', 'cache', '$rootScope', '$filter', function PhotosController( $scope, titleService, flickrService, $routeParams, cache, $rootScope, $filter ) {
 	titleService.setTitle( 'Albumy' );
 
 	// disable all handlers listening on a window scroll
 	$(window.document).off( "scroll");
 
 	// get albums
-	picasaService.getAlbumsCached($rootScope.albumOpts).then(function(albums) {
-		$scope.years = $filter('picasaItemsByYearsFilter')(albums);
+	flickrService.getAlbumsCached().then(function(albums) {
+		$scope.years = $filter('itemsByYearsFilter')(albums);
 	});
 
 }]);

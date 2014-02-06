@@ -33,16 +33,15 @@ angular.module( 'gury.photos', [
 /**
  * And of course we define a controller for our route.
  */
-.controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', '$routeParams', 'Working', '$q', function PhotosController( $scope, titleService, picasaService, $routeParams, Working, $q ) {
+.controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', 'flickrService', '$routeParams', 'Working', '$q', function PhotosController( $scope, titleService, picasaService, flickrService, $routeParams, Working, $q ) {
 	titleService.setTitle( 'Photos' );
 
 	$scope.toggleWorking = function() {
-		
-		if(Working.isWorking('picasaWorking')) {
-			Working.unset('picasaWorking');
+		if(Working.isWorking('fetchingPhotosWorking')) {
+			Working.unset('fetchingPhotosWorking');
 		}
 		else {
-			Working.set('picasaWorking');
+			Working.set('fetchingPhotosWorking');
 		}
 	};
 
@@ -70,7 +69,7 @@ angular.module( 'gury.photos', [
 
 	// show photos for a specified tag
 	if(type == "tag") {
-		picasaService.getPhotos({'max-results': 20, tag: $routeParams.val, picasaWorking: 'picasaWorking'}).then(function(data) {
+		flickrService.getPhotos({'per_page': 100, 'tags': $routeParams.val, 'pageType': type, 'page': 1, 'nextLink': ''}).then(function(data) {
 			$scope.photosData = data;
 			$scope.resetActPhotoIndexToZero();
 		});
@@ -83,7 +82,7 @@ angular.module( 'gury.photos', [
 	}
 	// show photos in a specified album
 	else if(type == "albumid") {
-		picasaService.getPhotos({'max-results': 20, 'albumid': $routeParams.val, picasaWorking: 'picasaWorking'}).then(function(data) {
+		flickrService.getPhotos({'per_page': 100, 'photoset_id': $routeParams.val, 'pageType': type, 'page': 1, 'nextLink': ''}).then(function(data) {
 			$scope.photosData = data;
 			$scope.resetActPhotoIndexToZero();
 		});
@@ -110,8 +109,8 @@ angular.module( 'gury.photos', [
 	$scope.nextPhoto = function() {
 		// is last photo but has more pages -> fetch another photos
 		if($scope.isLastPhotoButHasMorePages()) {
-			if(!Working.isWorking('picasaWorking')) {
-				Working.set('picasaWorking');
+			if(!Working.isWorking('fetchingPhotosWorking')) {
+				Working.set('fetchingPhotosWorking');
 				var promise = $scope.getNextItems($scope.photosData, $q.defer());
 				promise.then(function(data) {
 					$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
@@ -120,13 +119,13 @@ angular.module( 'gury.photos', [
 		}
 		// has more photos -> go to next photo
 		else if($scope.hasMorePhotos()) {
-			Working.set('picasaWorking');
+			Working.set('fetchingPhotosWorking');
 			$scope.actPhotoIndex = $scope.actPhotoIndex + 1;
 
 		}
 		// there are no more photos
 		else {
-			Working.unset('picasaWorking');
+			Working.unset('fetchingPhotosWorking');
 		}
 
 		return $scope.actPhoto();
@@ -140,7 +139,7 @@ angular.module( 'gury.photos', [
 		}
 		// go to on a previous image
 		else {
-			Working.set('picasaWorking');
+			Working.set('fetchingPhotosWorking');
 			$scope.actPhotoIndex = $scope.actPhotoIndex - 1;
 		}
 
@@ -165,7 +164,8 @@ angular.module( 'gury.photos', [
 	$scope.getNextItems = function(data, defer) {
 		if(!Working.isWorking('getNextItems')) {
 			if(data && data.nextLink) {
-				picasaService.getPhotos({ nextLink: data.nextLink, picasaWorking: 'picasaWorking' }).then(function(data) {
+				Working.set('getNextItems');
+				flickrService.getPhotos({ nextLink: data.nextLink }).then(function(data) {
 					// if there are some photos already append newly responded photos to it
 					if(photos().length > 0) {
 						angular.forEach(data.items, function(item) {
@@ -197,11 +197,11 @@ angular.module( 'gury.photos', [
 
 	// infinite scroll is disabled if we are alreading fetching photos or if there are no more photos
 	$scope.scrollIsDisabled = function() {
-		return Working.isWorking('picasaLoading') || !($scope.photosData && $scope.photosData.nextLink && $scope.photosData.nextLink.length > 0) ? true : false;
+		return Working.isWorking('fetchingPhotosWorking') || !($scope.photosData && $scope.photosData.nextLink && $scope.photosData.nextLink.length > 0) ? true : false;
 	};
 		
 	$scope.getAlbums = function() {
-		var promise = picasaService.getAlbums();
+		var promise = flickrService.getAlbums();
 		promise.then(function(data) {
 			$scope.albums = data;
 			Gury.log(data);
@@ -258,7 +258,7 @@ angular.module( 'gury.photos', [
 	$scope.maximizePopup = function(imgElm, imgW, imgH) {
 
 		// disable working
-		Working.unset('picasaWorking');
+		Working.unset('fetchingPhotosWorking');
 
 		if(imgW) {
 			$scope.actPhoto().image.w = imgW;
@@ -275,8 +275,8 @@ angular.module( 'gury.photos', [
 
 		imgElm = imgElm ? imgElm : $('#simple-modal');
 
-		picasaService.tuneExifData($scope.actPhoto());
-		picasaService.maximizeAndCenter( imgElm, $('#simple-modal'), imgW, imgH);
+		flickrService.tuneExifData($scope.actPhoto());
+		flickrService.maximizeAndCenter( imgElm, $('#simple-modal'), imgW, imgH);
 
 	};
 
@@ -294,7 +294,7 @@ angular.module( 'gury.photos', [
 
 	$scope.$watch('actPhoto()', function(newVal) {
 		if(newVal) {
-			picasaService.tuneExifData(newVal);
+			flickrService.tuneExifData(newVal);
 		}
 	});
 
