@@ -45,6 +45,7 @@ angular.module('gury.flickr', ['gury.base', 'gury.photosBase'])
 		},
 
 		phpproxycached: function(url) {
+			Gury.log(url);
 			// caching ttl is 2 days
 			return '/serverside/cache.php?phpcache_ttl=172800&phpcache_method=getset&phpcache_key=' + $filter('encodeUri')(url);
 		},
@@ -209,6 +210,7 @@ angular.module('gury.flickr', ['gury.base', 'gury.photosBase'])
 		}
 		else if(params.pageType == 'latest') {
 			url = urls.photos(params);
+			dataCtg = 'photos';
 		}
 
 		if(params && params.nextLink) {

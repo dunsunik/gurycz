@@ -76,7 +76,8 @@ angular.module( 'gury.photos', [
 	}
 	// show latest photos
 	else if(type == "latest") {
-		picasaService.getPhotos({'max-results': 4, tag: $routeParams.val}).then(function(data) {
+		flickrService.getPhotos({'per_page': 100, 'pageType': type, 'page': 1, 'nextLink': ''}).then(function(data) {
+			$scope.photosData = data;
 			$scope.resetActPhotoIndexToZero();
 		});
 	}

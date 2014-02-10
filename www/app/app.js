@@ -14,7 +14,7 @@ angular.module( 'gury', [
 ]).
 
 config( function myAppConfig ( $routeProvider ) {
-	$routeProvider.otherwise({ redirectTo: '/hp' });
+	$routeProvider.otherwise({ redirectTo: '/portfolio' });
 }).
 
 run([ 'titleService', '$rootScope', 'picasaService', 'flickrService', 'Working', 'cache', '$filter', '$q', function run ( titleService, $rootScope, picasaService, flickrService, Working, cache, $filter, $q ) {
