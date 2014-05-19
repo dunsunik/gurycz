@@ -1,4 +1,5 @@
 angular.module( 'gury', [
+	'ngRoute',
 	'ahTouch',
 	'app-templates',
 	'component-templates',
