@@ -14,7 +14,7 @@ show="modalShow()" shown="modalShown()" hide="modalHide()" hidden="modalHidden()
 tabindex="-1" role="dialog" close="closePhoto()" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" aria-hidden="true"
 global-keydown="{8: 'prevPhoto()', 37: 'prevPhoto()', 32: 'nextPhoto()', 39: 'nextPhoto()', 13: 'toggleFsMode()', 72: 'toggleExifInfo()', 73: 'toggleExifInfo()', 27: 'closePhoto()', 86: 'toggleVerbosity()' }" global-keydown-enabled="modal.isVisible" 
 toggle-fs-mode="modal.fsModeEnabled">
-	<div class="dynamic-modal-body">
+	<div class="dynamic-modal-body" ng-show="!isWorking()">
 		<img ng-src="{{actPhoto().image.url | imgSrcFilter}}" width="{{actPhoto().image.w}}" height="{{actPhoto().image.h}}" 
 		ah-swipeleft="prevPhoto()" ah-swiperight="nextPhoto()" ah-swiperight-options="{prevent_default: true}" ah-swipeleft-options="{prevent_default: true}" 
 		image-loaded="maximizePopup"

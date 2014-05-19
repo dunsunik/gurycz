@@ -36,6 +36,10 @@ angular.module( 'gury.photos', [
 .controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', 'flickrService', '$routeParams', 'Working', '$q', function PhotosController( $scope, titleService, picasaService, flickrService, $routeParams, Working, $q ) {
 	titleService.setTitle( 'Photos' );
 
+	$scope.modalShown = function() {
+		// Working.unset('fetchingPhotosWorking');
+	};
+
 	$scope.toggleWorking = function() {
 		if(Working.isWorking('fetchingPhotosWorking')) {
 			Working.unset('fetchingPhotosWorking');
@@ -233,6 +237,7 @@ angular.module( 'gury.photos', [
 
 	$scope.openPhoto = function(index) {
 		$scope.actPhotoIndex = index;
+		// Working.set('fetchingPhotosWorking');
 		$scope.modal.isVisible = true;
 	};
 
@@ -258,9 +263,6 @@ angular.module( 'gury.photos', [
 	// or from windowResized directive when dimensions of a window browser have changed
 	$scope.maximizePopup = function(imgElm, imgW, imgH) {
 
-		// disable working
-		Working.unset('fetchingPhotosWorking');
-
 		if(imgW) {
 			$scope.actPhoto().image.w = imgW;
 		}
@@ -279,6 +281,9 @@ angular.module( 'gury.photos', [
 		flickrService.tuneExifData($scope.actPhoto());
 		flickrService.maximizeAndCenter( imgElm, $('#simple-modal'), imgW, imgH);
 
+		// disable working - will hide loading spinner and show a modal body
+		Working.unset('fetchingPhotosWorking');
+
 	};
 
 	// toggles between title visible, buttons visible, nothing visible
@@ -293,7 +298,10 @@ angular.module( 'gury.photos', [
 		}
 	};
 
-	$scope.$watch('actPhoto()', function(newVal) {
+	$scope.$watch('actPhoto()', function(newVal, oldVal) {
+		if(oldVal != newVal) {
+			Working.set('fetchingPhotosWorking');
+		}
 		if(newVal) {
 			flickrService.tuneExifData(newVal);
 		}
