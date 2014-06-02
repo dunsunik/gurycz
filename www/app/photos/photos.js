@@ -248,7 +248,20 @@ angular.module( 'gury.photos', [
 	$scope.toggleExifInfo = function() {
 		// will become enabled -> regenerate and tidy exif data
 		if(!$scope.modal.exifInfoEnabled) {
-			picasaService.tuneExifData($scope.actPhoto());
+			var photoId = $scope.actPhoto() && $scope.actPhoto().id ? $scope.actPhoto().id : undefined;
+			if(!photoId) {
+				return;
+			}
+			if(!($scope.actPhoto() && $scope.actPhoto().exifTuned)) {
+				var promise = flickrService.getExif({'photoId': photoId});
+				promise.then(function(exifData) {
+					if(!(exifData && exifData.data && exifData.data.exif)) {
+						return;
+					}
+					$scope.actPhoto().exif = exifData.data.exif;
+					flickrService.tuneExifData($scope.actPhoto());
+				});
+			}
 		}
 
 		$scope.modal.exifInfoEnabled = $scope.modal.exifInfoEnabled ? false : true;
@@ -278,7 +291,7 @@ angular.module( 'gury.photos', [
 
 		imgElm = imgElm ? imgElm : $('#simple-modal');
 
-		flickrService.tuneExifData($scope.actPhoto());
+		// flickrService.tuneExifData($scope.actPhoto());
 		flickrService.maximizeAndCenter( imgElm, $('#simple-modal'), imgW, imgH);
 
 		// disable working - will hide loading spinner and show a modal body
@@ -303,7 +316,8 @@ angular.module( 'gury.photos', [
 			Working.set('fetchingPhotosWorking');
 		}
 		if(newVal) {
-			flickrService.tuneExifData(newVal);
+			$scope.modal.exifInfoEnabled = false;
+			newVal.exif = {};
 		}
 	});
 

@@ -20,7 +20,7 @@ toggle-fs-mode="modal.fsModeEnabled">
 		image-loaded="maximizePopup"
 		window-resized="maximizePopup" window-resized-enabled="modal.isVisible" ng-click="toggleVerbosity()"/>
 		<div ng-class="{'dynamic-modal-footer': true, 'display-no': (!modal.titleIsVisible)}">
-			<div class="pull-left title" ng-bind-html-unsafe="actPhoto().title | addNbspPaddingFilter:2"></div>
+			<div class="pull-left title" ng-bind="actPhoto().title"></div>
 		</div>
 	</div>
 
@@ -40,16 +40,15 @@ toggle-fs-mode="modal.fsModeEnabled">
 		<div class="middleLayer">
 			<button class="btn btn-link middle transparent" ng-click="prevPhoto()" title="Předchozí fotka - klávesa šipka do leva"><i class="icon-backward icon-white"></i></button>
 		</div>
-		<button class="btn btn-link bottom transparent" ng-click="toggleExifInfo()" title="Zobrazí/Skryje EXIF informace - klávesa i"><i class="icon-question-sign icon-white"></i></button>
+		<button class="btn btn-link bottom transparent" ng-click="toggleVerbosity()" title="Zobrazí/skryje tlačítka a popisek fotky"><i class="icon-align-center icon-white"></i></button>
 	</div>
 	<div ng-class="{'dynamic-modal-right': true, 'display-no': (!modal.buttonsAreVisible)}">
 		<button class="btn btn-link top transparent" ng-click="closePhoto()" class="close" data-dismiss="modal" type="button" title="Zavře okno prohlížení fotek - klávesa Esc"><i class="icon-remove icon-white"></i></button>
 		<div class="middleLayer">
 			<button class="btn btn-link middle transparent" ng-click="nextPhoto()" title="Další fotka - klávesa šipka do prava nebo mezerník"><i class="icon-forward icon-white"></i></button>
 		</div>
-		<button class="btn btn-link bottom transparent" ng-click="toggleVerbosity()" title="Zobrazí/skryje tlačítka a popisek fotky"><i class="icon-align-center icon-white"></i></button>
 	</div>
-	<div ng-class="{'dynamic-modal-right': true, 'dynamic-modal-right-corner': true, 'display-no': modal.buttonsAreVisible}">
+	<div ng-class="{'dynamic-modal-left': true, 'dynamic-modal-left-corner': true, 'display-no': modal.buttonsAreVisible}">
 		<button class="btn btn-link bottom transparent" ng-click="toggleVerbosity()" title="Zobrazí/skryje tlačítka a popisek fotky - klávesa v"><i class="icon-align-center icon-white"></i></button>
 	</div>
 </div>

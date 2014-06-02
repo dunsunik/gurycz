@@ -72,6 +72,14 @@ angular.module('gury.flickr', ['gury.base', 'gury.photosBase'])
 			return urls.phpproxycached(url);
 		},
 
+		// will get all existing sets (albums)
+		exif : function(params) {
+			var url = this.prepare(params);
+			url = url + '&method=flickr.photos.getExif';
+			url = url + '&photo_id=' + params.photoId;
+			return urls.phpproxycached(url);
+		},
+
 		tags : function(params) {
 		},
 
@@ -275,6 +283,27 @@ angular.module('gury.flickr', ['gury.base', 'gury.photosBase'])
 		return this.getPhotos(params);
 	},
 
+	// params: photoId
+	getExif: function(parameters) {
+		Working.set('fetchingPhotosWorking');
+		var params = this.extendParams(parameters);
+
+		var url = params && params.absUrl ? params.absUrl : urls.exif(params);
+		var d = $q.defer();
+
+		$http.jsonp(url).success(function(data, status) {
+			Working.unset('fetchingPhotosWorking');
+			var out = {
+				'data': data.photo
+			};
+			d.resolve(out);
+		}).error(function(errMsg, status) {
+			Working.unset('fetchingPhotosWorking');
+			d.reject(errMsg);
+		});
+		return d.promise;
+	},
+
 	// params: albumid, max-results
 	getTags: function(params) {
 		var url = urls.tags(params);
@@ -383,53 +412,58 @@ angular.module('gury.flickr', ['gury.base', 'gury.photosBase'])
 			var exifArray = [];
 			var val;
 
-			val = item.exif['fstop'];
+			var exifHash = {};
+
+			for(var i = 0; i < item.exif.length; i++) {
+				exifHash[item.exif[i].tag] = item.exif[i].clean &&  item.exif[i].clean._content ? item.exif[i].clean._content : item.exif[i].raw._content;
+			}
+
+			val = exifHash['FNumber'];
 			if(val) {
-				val = val + " f";
 				exifArray.push({ "Clona" : val });
 			}
 
-			val = item.exif['exposure'];
+			val = exifHash['ExposureTime'];
 			if(val) {
-				val = "1/" + Math.round(1 / val) + " s";
 				exifArray.push({ "Čas" : val });
 			}
 
-			val = item.exif['focallength'];
+			val = exifHash['FocalLength'];
 			if(val) {
-				val = parseInt(val + 0, 10) + " mm";
 				exifArray.push({ "Ohnisko" : val });
 			}
 
-			val = item.exif['iso'];
+			val = exifHash['ISO'];
 			if(val) {
 				val = val;
 				exifArray.push({ "ISO" : val });
 			}
 			
-			val = item.exif['flash'];
+			val = exifHash['Flash'];
 			if(val) {
-				val = val ? "ano" : "ne";
 				exifArray.push({ "Blesk" : val });
 			}
 
-			val = item.exif['make'];
+			val = exifHash['Make'];
 			if(val) {
 				val = val;
 				exifArray.push({ "Značka" : val });
 			}
 
-			val = item.exif['model'];
+			val = exifHash['Model'];
 			if(val) {
 				val = val;
 				exifArray.push({ "Model" : val });
 			}
 
-			val = item.exif['time'];
+			val = exifHash['Lens'];
 			if(val) {
-				var date = new Date();
-				date.setTime((val + 0) / 10);
-				val = date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
+				val = val;
+				exifArray.push({ "Lens" : val });
+			}
+
+			val = exifHash['DateTimeOriginal'];
+			if(val) {
 				exifArray.push({ "Datum" : val });
 			}
 
