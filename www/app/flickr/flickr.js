@@ -30,7 +30,7 @@ angular.module('gury.flickr', ['gury.base', 'gury.photosBase'])
 		prepare : function(params) {
 			params = params ? params : {};
 
-			var url = 'http://api.flickr.com/services/rest/?format=json&jsoncallback=JSON_CALLBACK';
+			var url = 'https://api.flickr.com/services/rest/?format=json&jsoncallback=JSON_CALLBACK';
 
 			var parameters = ['api_key', 'user_id', 'per_page', 'page', 'tags', 'photoset_id'];
 
