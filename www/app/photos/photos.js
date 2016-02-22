@@ -33,7 +33,7 @@ angular.module( 'gury.photos', [
 /**
  * And of course we define a controller for our route.
  */
-.controller( 'PhotosCtrl', [ '$scope', 'titleService', 'picasaService', 'flickrService', '$routeParams', 'Working', '$q', function PhotosController( $scope, titleService, picasaService, flickrService, $routeParams, Working, $q ) {
+.controller( 'PhotosCtrl', [ '$scope', '$rootScope', 'titleService', 'picasaService', 'flickrService', '$routeParams', 'Working', '$q', function PhotosController( $scope, $rootScope, titleService, picasaService, flickrService, $routeParams, Working, $q ) {
 	titleService.setTitle( 'Photos' );
 
 	$scope.modalShown = function() {
@@ -71,23 +71,25 @@ angular.module( 'gury.photos', [
 		titleIsVisible: true
 	};
 
+	$scope.isHighResolutionMode = Cookies.get('isHighResolutionMode') ? true : false;
+
 	// show photos for a specified tag
 	if(type == "tag") {
-		flickrService.getPhotos({'per_page': 100, 'tags': $routeParams.val, 'pageType': type, 'page': 1, 'nextLink': ''}).then(function(data) {
+		flickrService.getPhotos({'per_page': 100, 'tags': $routeParams.val, 'pageType': type, 'page': 1, 'nextLink': undefined}).then(function(data) {
 			$scope.photosData = data;
 			$scope.resetActPhotoIndexToZero();
 		});
 	}
 	// show latest photos
 	else if(type == "latest") {
-		flickrService.getPhotos({'per_page': 100, 'pageType': type, 'page': 1, 'nextLink': ''}).then(function(data) {
+		flickrService.getPhotos({'per_page': 100, 'pageType': type, 'page': 1, 'nextLink': undefined}).then(function(data) {
 			$scope.photosData = data;
 			$scope.resetActPhotoIndexToZero();
 		});
 	}
 	// show photos in a specified album
 	else if(type == "albumid") {
-		flickrService.getPhotos({'per_page': 100, 'photoset_id': $routeParams.val, 'pageType': type, 'page': 1, 'nextLink': ''}).then(function(data) {
+		flickrService.getPhotos({'per_page': 100, 'photoset_id': $routeParams.val, 'pageType': type, 'page': 1, 'nextLink': undefined}).then(function(data) {
 			$scope.photosData = data;
 			$scope.resetActPhotoIndexToZero();
 		});
@@ -202,7 +204,7 @@ angular.module( 'gury.photos', [
 
 	// infinite scroll is disabled if we are alreading fetching photos or if there are no more photos
 	$scope.scrollIsDisabled = function() {
-		return Working.isWorking('fetchingPhotosWorking') || !($scope.photosData && $scope.photosData.nextLink && $scope.photosData.nextLink.length > 0) ? true : false;
+		return Working.isWorking('fetchingPhotosWorking') || !($scope.photosData && $scope.photosData.nextLink && $scope.photosData.nextLink.isSet()) ? true : false;
 	};
 		
 	$scope.getAlbums = function() {
@@ -297,6 +299,18 @@ angular.module( 'gury.photos', [
 		// disable working - will hide loading spinner and show a modal body
 		Working.unset('fetchingPhotosWorking');
 
+	};
+
+	$scope.getResolutionMode = function() {
+		return $rootScope.resolutionMode;
+	};
+
+	$scope.setResolutionMode = function(mode) {
+		Cookies.set('resolutionMode', mode,  { expires: 365, path: '/', secure: false });
+		$rootScope.resolutionMode.actual = mode;
+		Gury.log('Setting resolution mode:');
+		Gury.log($rootScope.resolutionMode);
+		location.reload();
 	};
 
 	// toggles between title visible, buttons visible, nothing visible

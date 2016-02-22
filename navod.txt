@@ -4,7 +4,7 @@ git pull origin master
 grunt clean
 grunt watch
 zastavit nginx, pustit apache
-http://gury.local/
+http://gury.local/index.html
 git push origin master
 
 uziv.jmeno do githubu je dunsun@gmail.com

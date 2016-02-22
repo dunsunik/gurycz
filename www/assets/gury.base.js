@@ -47,3 +47,31 @@ Gury.updateQueryString = function(url, key, value) {
             return url;
     }
 };
+
+Gury.Url = function(url, proxyFn) {
+	this.url = {original: '', proxied: ''};
+	this.proxyFn = proxyFn;
+	if(url) {
+		this.url.original = url;
+		this.url.proxied = this.proxyFn(this.url.original);
+	}
+};
+
+Gury.Url.prototype.get = function() {
+	return this.url;
+};
+
+Gury.Url.prototype.set = function(url) {
+	this.url.original = url;
+	this.url.proxied = this.proxyFn(this.url.original);
+	return this.url;
+};
+
+Gury.Url.prototype.isSet = function() {
+	return this.url && this.url.proxied ? true : false;
+};
+
+Gury.Url.prototype.toString = function() {
+	return this.url;
+};
+

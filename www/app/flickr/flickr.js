@@ -54,14 +54,14 @@ angular.module('gury.flickr', ['gury.base', 'gury.photosBase'])
 			var url = this.prepare(params);
 			url = url + '&method=flickr.photos.search';
 			url = url + '&extras=original_format,date_taken,url_o,o_dims,url_' + params.thumbSize + ',' + params.thumbSize + '_dims';
-			return urls.phpproxycached(url);
+			return new Gury.Url(url, urls.phpproxycached);
 		},
 
 		photosInPhotoset : function(params) {
 			var url = this.prepare(params);
 			url = url + '&method=flickr.photosets.getPhotos';
 			url = url + '&extras=original_format,date_taken,url_o,o_dims,url_' + params.thumbSize + ',' + params.thumbSize + '_dims';
-			return urls.phpproxycached(url);
+			return new Gury.Url(url, urls.phpproxycached);
 		},
 
 		// will get all existing sets (albums)
@@ -221,13 +221,13 @@ angular.module('gury.flickr', ['gury.base', 'gury.photosBase'])
 			dataCtg = 'photos';
 		}
 
-		if(params && params.nextLink) {
+		if(params && params.nextLink && params.nextLink.isSet()) {
 			url = params.nextLink;
 		}
 
 		var d = $q.defer();
 
-		$http.jsonp(url).success(function(data, status) {
+		$http.jsonp(url.get().proxied).success(function(data, status) {
 			var out = {
 				items: data[dataCtg].photo,
 				pages: data[dataCtg].pages,
@@ -264,7 +264,8 @@ angular.module('gury.flickr', ['gury.base', 'gury.photosBase'])
 
 			// nextLink
 			if(out.pages > 1 && out.pages > out.page) {
-				out.nextLink = Gury.updateQueryString(url, 'page', (parseInt(out.page, 10) + 1));
+				url.set(Gury.updateQueryString(url.get().original, 'page', (parseInt(out.page, 10) + 1)));
+				out.nextLink = url;
 			}
 
 			Working.unset('fetchingPhotosWorking');

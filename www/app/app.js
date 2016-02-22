@@ -19,12 +19,37 @@ config( function myAppConfig ( $routeProvider ) {
 }).
 
 run([ 'titleService', '$rootScope', 'picasaService', 'flickrService', 'Working', 'cache', '$filter', '$q', function run ( titleService, $rootScope, picasaService, flickrService, Working, cache, $filter, $q ) {
+
+	// if hires cookie is not set yet set it to 0 (lowres)
+	if(Cookies.get('resolutionMode') === undefined) {
+		Cookies.set('resolutionMode', 'low',  { expires: 365, path: '/', secure: false });
+	}
+
+	$rootScope.resolutionMode = {
+		actual: Cookies.get('resolutionMode'),
+		variants: {
+			high: 'o',
+			low: 'b'
+		},
+		actualConverted: function() {
+			if(this.actual) {
+				return this.variants[this.actual];
+			}
+			else {
+				return this.variants.low;
+			}
+		}
+	};
+
+	Gury.log('Setting Resolution mode:');
+	Gury.log($rootScope.resolutionMode);
+
 	// set flickr settings
 	flickrService.setOpts({
 		api_key: 'acc0d15f07c3f8cb5838d583971cc3e5',
 		user_id: '30314549@N02',
 		thumbSize: 'q',
-		fullSize: 'o',
+		fullSize: $rootScope.resolutionMode.actualConverted(),
 		albumSize: 'm',
 		albumPerPage: 100
 	});

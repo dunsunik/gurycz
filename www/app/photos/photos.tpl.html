@@ -62,6 +62,10 @@ toggle-fs-mode="modal.fsModeEnabled">
 				<a href="" ng-click="goBack()" class="goback">&lt;&lt; zpět</a>
 				<h2>Fotky</h2>
 				<h3>Náhledy vyfocených fotografií</h3>
+				<div class="resolutionMode">
+					<a href="" ng-show="(getResolutionMode().actual === 'low')" ng-click="setResolutionMode('high')" class="goback" title="Fotografie budou větší a detailnější (sníží se ale rychlost načítání)">Přepnout na<br/>vysoké rozlišení</a>
+					<a href="" ng-show="(getResolutionMode().actual === 'high')" ng-click="setResolutionMode('low')" class="goback" title="Fotografie budou menší (zkrátí se doba načítání)">Přepnout na<br/>nízké rozlišení</a>
+				</div>
 			</hgroup>
 		</div>
 	</div>
@@ -79,7 +83,8 @@ toggle-fs-mode="modal.fsModeEnabled">
 					</li>
 				</ul>
 
-				<button ng-show="photosData.nextLink && photosData.nextLink.length > 0" ng-click="getNextItems(photosData)" inf-scroll="getNextItems(photosData)" inf-scroll-is-disabled="scrollIsDisabled()">Další fotky</button>
+
+				<button ng-show="photosData.nextLink && photosData.nextLink.isSet()" ng-click="getNextItems(photosData)" inf-scroll="getNextItems(photosData)" inf-scroll-is-disabled="scrollIsDisabled()">Další fotky</button>
 		</div>
 	</div>
 </section>
